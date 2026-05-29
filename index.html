@@ -18,16 +18,13 @@ body { background: #fafafa; color: #333; }
 .b-pending{background:#FAEEDA;color:#854F0B}
 .b-empty{background:#e9ecef;color:#6c757d}
 .b-unknown{background:#FCEBEB;color:#791F1F}
-.b-high{background:#FCEBEB;color:#791F1F}
-.b-med{background:#FAEEDA;color:#854F0B}
 .b-open{background:#EAF3DE;color:#3B6D11}
 .b-invest{background:#E6F1FB;color:#0C447C}
 .b-done{background:#EAF3DE;color:#3B6D11}
-.setup-card{background:#e6f1fb; border:1px solid #b8daff; padding:12px; border-radius:6px; margin-bottom:1.25rem; font-size:13px; color: #004085;}
 .pin-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
 .pin-row input{width:150px;font-size:13px;padding:5px 10px;border-radius:6px;border:0.5px solid #ced4da;background:#fff;color:#000;direction:ltr}
-.pin-row button, .issues-form button, .detail-card button, #saveExpRow button, #saveMonthRow button, .setup-card button{padding:6px 12px; font-size:12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer;}
-.pin-row button:hover, .setup-card button:hover{background:#0056b3}
+.pin-row button, .issues-form button, .detail-card button, #saveExpRow button, .setup-card button{padding:6px 12px; font-size:12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer;}
+.pin-row button:hover{background:#0056b3}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1.25rem}
 .mc{background:#fff; border: 0.5px solid #dee2e6; border-radius:6px;padding:12px 10px}
 .mc .lbl{font-size:11px;color:#6c757d;margin-bottom:3px}
@@ -63,12 +60,6 @@ tr:last-child td{border-bottom:none}
 .issues-form{display:none;flex-direction:column;gap:8px;margin-bottom:1rem;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
 .issues-form.open{display:flex}
 .issues-form input,.issues-form select{font-size:13px; padding:5px; border:0.5px solid #ced4da; border-radius:4px;}
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
-@media(max-width:480px){.charts-row{grid-template-columns:1fr}}
-.chart-card{background:#fff;border:0.5px solid #dee2e6;border-radius:8px;padding:1rem}
-.chart-title{font-size:12px;font-weight:500;color:#6c757d;margin-bottom:10px}
-.prog-wrap{width:100%;background:#e9ecef;border-radius:20px;height:7px;margin-top:4px}
-.prog-bar{height:7px;border-radius:20px;transition:width .5s}
 .exp-input{background:transparent;border:none;border-bottom:0.5px solid #ced4da;width:80px;font-size:12px;color:#000;text-align:right;padding:1px 2px}
 .loading-overlay{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999;font-size:14px;color:#6c757d;flex-direction:column;gap:12px;text-align:center;padding:20px}
 .spinner{width:32px;height:32px;border:3px solid #e9ecef;border-top-color:#007bff;border-radius:50%;animation:spin .8s linear infinite}
@@ -95,14 +86,6 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
-  <!-- كارت معلومات الـ GitHub -->
-  <div class="setup-card" id="setupCard">
-    <div style="font-weight:bold;margin-bottom:5px;"><i class="ti ti-settings"></i> إعدادات قاعدة بيانات GitHub:</div>
-    <div id="setupInfo" style="line-height: 1.6;">
-      يتم قراءة وحفظ البيانات مباشرة من ملف <code style="font-weight:bold; background:#fff; padding:2px 5px;">data.json</code> داخل الـ Repository الخاص بك.
-    </div>
-  </div>
-
   <div class="pin-row">
     <input type="password" id="tokenInput" placeholder="أدخل GitHub PAT Token للـ التعديل..." style="width: 260px;"/>
     <button onclick="saveTokenAndLogin()"><i class="ti ti-key" aria-hidden="true"></i> تفعيل صلاحية الحفظ</button>
@@ -117,10 +100,8 @@ tr:last-child td{border-bottom:none}
     <button class="tab active" onclick="switchTab('payments',this)"><i class="ti ti-coin" aria-hidden="true"></i> المدفوعات</button>
     <button class="tab" onclick="switchTab('issues',this)"><i class="ti ti-tool" aria-hidden="true"></i> المشاكل</button>
     <button class="tab" onclick="switchTab('expenses',this)"><i class="ti ti-receipt" aria-hidden="true"></i> المصاريف</button>
-    <button class="tab" onclick="switchTab('charts',this)"><i class="ti ti-chart-bar" aria-hidden="true"></i> الرسوم البيانية</button>
   </div>
 
-  <!-- PAYMENTS TAB -->
   <div id="tab-payments" class="tab-content active">
     <div class="sec-title"><i class="ti ti-home" aria-hidden="true"></i> حالة الشقق</div>
     <div class="legend">
@@ -134,21 +115,18 @@ tr:last-child td{border-bottom:none}
     <div class="card"><table><thead><tr><th>رقم الشقة</th><th>حالة الساكن</th><th>الدفع</th><th id="editColHeader" style="display:none">تعديل</th></tr></thead><tbody id="payTbody"></tbody></table></div>
   </div>
 
-  <!-- ISSUES TAB -->
   <div id="tab-issues" class="tab-content">
     <div class="issues-form" id="issueForm">
       <div style="font-size:13px;font-weight:500;color:#111">إضافة مشكلة جديدة</div>
-      <input type="text" id="newIssueText" placeholder="وصف المشكلة..."/>
       <div style="display:flex;gap:8px">
-        <select id="newIssuePri"><option value="high">أولوية عالية</option><option value="med" selected>متوسطة</option></select>
+        <input type="text" id="newIssueText" placeholder="وصف المشكلة..." style="flex:1;"/>
         <button onclick="addIssue()" style="font-size:12px;padding:4px 12px"><i class="ti ti-plus" aria-hidden="true"></i> إضافة</button>
         <span class="notif" id="issueNotif">تمت الإضافة ✓</span>
       </div>
     </div>
-    <div class="card"><table><thead><tr><th>#</th><th>المشكلة</th><th>الأولوية</th><th>الحالة</th><th id="issueEditCol" style="display:none">تعديل</th></tr></thead><tbody id="issuesTbody"></tbody></table></div>
+    <div class="card"><table><thead><tr><th>#</th><th>المشكلة</th><th>الحالة</th><th id="issueEditCol" style="display:none">تعديل</th></tr></thead><tbody id="issuesTbody"></tbody></table></div>
   </div>
 
-  <!-- EXPENSES TAB -->
   <div id="tab-expenses" class="tab-content">
     <div class="sec-title"><i class="ti ti-wallet" aria-hidden="true"></i> المصاريف الشهرية المشتركة</div>
     <div class="card">
@@ -161,42 +139,19 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
   </div>
-
-  <!-- CHARTS TAB -->
-  <div id="tab-charts" class="tab-content">
-    <div class="charts-row">
-      <div class="chart-card"><div class="chart-title">توزيع حالة الشقق</div><div style="position:relative;height:210px"><canvas id="pieChart" role="img" aria-label="توزيع حالة الشقق">رسم بياني دائري.</canvas></div></div>
-      <div class="chart-card"><div class="chart-title">مدفوعات محصلة مقابل متبقية</div><div style="position:relative;height:210px"><canvas id="barChart" role="img" aria-label="مقارنة المدفوعات">رسم بياني أعمدة.</canvas></div></div>
-    </div>
-    <div class="chart-card" style="margin-bottom:1.25rem">
-      <div class="chart-title">تقدم إنجاز المشاكل</div>
-      <div id="issueProgress"></div>
-    </div>
-    <div class="card">
-      <div class="sec-title" style="margin-bottom:8px"><i class="ti ti-trending-up" aria-hidden="true"></i> نسبة التحصيل الشهري</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px" id="monthlyWrap"></div>
-      <div id="saveMonthRow" style="margin-top:10px;display:none">
-        <button onclick="saveMonthly()" style="font-size:12px;padding:4px 12px"><i class="ti ti-device-floppy" aria-hidden="true"></i> حفظ</button>
-        <span class="notif" id="monthNotif" style="margin-right:8px">تم الحفظ ✓</span>
-      </div>
-    </div>
-  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ==================== [ إعدادات جيت هاب الخاصة بك ] ====================
 const GH_OWNER = "abdo78-max"; // اسم حسابك
 const GH_REPO  = "Building_162"; // اسم الـ Repository مع مراعاة الحروف الكابيتال
 const GH_PATH  = "data.json";            
 // ======================================================================
-  // ======================================================================
 
 let isAdmin = false;
-let pieInst = null, barInst = null;
 let fileSha = ""; // سيتم جلبه ديناميكياً لتفادي تضارب البيانات أثناء التحديث
 
-let flats = [], issues = [], expenses = [], monthly = [];
+let flats = [], issues = [], expenses = [];
 const statusLabel = {agreed:"وافق على الدفع", empty:"لا أحد", maybe:"ربما لا أحد", unknown:"لم نصل إليه"};
 
 // تحميل البيانات من GitHub API
@@ -229,7 +184,6 @@ async function loadData() {
     flats    = serverData.flats || [];
     issues   = serverData.issues || [];
     expenses = serverData.expenses || [];
-    monthly  = serverData.monthly || [];
 
     if (serverData.lastUpdated) {
       document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + serverData.lastUpdated;
@@ -254,7 +208,7 @@ async function persistAll() {
   }
 
   const now = new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  const payload = { flats, issues, expenses, monthly, lastUpdated: now };
+  const payload = { flats, issues, expenses, lastUpdated: now };
   
   // تحويل البيانات لنص JSON ثم تشفيرها بصيغة Base64 المتوافقة مع جيت هاب والعربي
   const jsonString = JSON.stringify(payload, null, 2);
@@ -263,12 +217,12 @@ async function persistAll() {
   }));
 
   try {
-    // خطوة أمان إضافية: جلب الـ SHA الأحدث فوراً قبل الرفع لتفادي خطأ الـ Conflict
+    // جلب الـ SHA الأحدث فوراً قبل الرفع لتفادي خطأ الـ Conflict
     const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
        headers: token ? { "Authorization": `token ${token}` } : {}
     });
     if(getRes.ok) {
-       const getJson = await getRes.ok ? await getRes.json() : {};
+       const getJson = await getRes.json();
        if(getJson.sha) fileSha = getJson.sha;
     }
 
@@ -322,7 +276,6 @@ function checkTokenState() {
     document.getElementById('logoutBtn').style.display  = 'inline-block';
     document.getElementById('issueForm').classList.add('open');
     document.getElementById('saveExpRow').style.display  = 'block';
-    document.getElementById('saveMonthRow').style.display= 'block';
     document.getElementById('editColHeader').style.display = 'table-cell';
     document.getElementById('issueEditCol').style.display  = 'table-cell';
   } else {
@@ -333,7 +286,6 @@ function checkTokenState() {
     document.getElementById('logoutBtn').style.display  = 'none';
     document.getElementById('issueForm').classList.remove('open');
     document.getElementById('saveExpRow').style.display  = 'none';
-    document.getElementById('saveMonthRow').style.display= 'none';
     document.getElementById('editColHeader').style.display = 'none';
     document.getElementById('issueEditCol').style.display = 'none';
   }
@@ -357,7 +309,6 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
-  if (id==='charts') setTimeout(renderCharts, 80);
 }
 
 function fcClass(f) {
@@ -440,7 +391,6 @@ function renderPayTable() {
 function renderIssues() {
   const tb=document.getElementById('issuesTbody');
   tb.innerHTML='';
-  const priMap={high:'<span class="badge b-high">عالية</span>',med:'<span class="badge b-med">متوسطة</span>'};
   const stMap={pending:'<span class="badge b-pending">انتظار</span>',open:'<span class="badge b-open">مفتوحة</span>',investigating:'<span class="badge b-invest">جارٍ</span>',done:'<span class="badge b-done">منجزة</span>'};
   issues.forEach(iss=>{
     let editTd='';
@@ -452,17 +402,17 @@ function renderIssues() {
         <option value="done" ${iss.status==='done'?'selected':''}>منجزة</option>
       </select></td>`;
     }
-    tb.innerHTML+=`<tr><td>${iss.id}</td><td>${iss.text}</td><td>${priMap[iss.pri]||''}</td><td>${stMap[iss.status]||''}</td>${editTd}</tr>`;
+    tb.innerHTML+=`<tr><td>${iss.id}</td><td>${iss.text}</td><td>${stMap[iss.status]||''}</td>${editTd}</tr>`;
   });
 }
 async function changeIssueStatus(id,val) {
   const iss=issues.find(x=>x.id===id);
-  if(iss){iss.status=val; await persistAll(); renderIssues(); renderIssueProgress();}
+  if(iss){iss.status=val; await persistAll(); renderIssues();}
 }
 async function addIssue() {
   const txt=document.getElementById('newIssueText').value.trim();
   if(!txt)return;
-  issues.push({id:issues.length+1,text:txt,pri:document.getElementById('newIssuePri').value,status:'pending'});
+  issues.push({id:issues.length+1,text:txt,pri:'med',status:'pending'});
   document.getElementById('newIssueText').value='';
   await persistAll();
   flash('issueNotif');
@@ -499,64 +449,12 @@ function renderMetrics() {
     <div class="mc"><div class="lbl">مشاكل منجزة</div><div class="val">${doneIss}/${issues.length}</div></div>`;
 }
 
-function renderCharts() {
-  const agreed=flats.filter(f=>f.status==='agreed').length;
-  const paid=flats.filter(f=>f.paid).length;
-  const empty=flats.filter(f=>f.status==='empty'||f.status==='maybe').length;
-  const unknown=flats.filter(f=>f.status==='unknown').length;
-  const notPaid=agreed-paid;
-  if(pieInst)pieInst.destroy();
-  pieInst=new Chart(document.getElementById('pieChart'),{
-    type:'doughnut',
-    data:{labels:['وافق / لم يدفع','فارغة','لم نصل','دفع'],datasets:[{data:[notPaid,empty,unknown,paid],backgroundColor:['#EF9F27','#B4B2A9','#F09595','#97C459'],borderWidth:1,borderColor:'rgba(0,0,0,0.05)'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:6}}}}
-  });
-  if(barInst)barInst.destroy();
-  barInst=new Chart(document.getElementById('barChart'),{
-    type:'bar',
-    data:{labels:['دفعوا','لم يدفعوا','فارغة','لم نصل'],datasets:[{label:'شقق',data:[paid,notPaid,empty,unknown],backgroundColor:['#97C459','#EF9F27','#B4B2A9','#F09595'],borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}
-  });
-  renderIssueProgress();
-  renderMonthly();
-}
-function renderIssueProgress() {
-  const w=document.getElementById('issueProgress');
-  if(!w)return;
-  w.innerHTML='';
-  issues.forEach(iss=>{
-    const pct=iss.status==='done'?100:iss.status==='investigating'?50:iss.status==='open'?20:5;
-    const col=pct===100?'#639922':pct>=50?'#EF9F27':'#B4B2A9';
-    w.innerHTML+=`<div style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:#6c757d;margin-bottom:3px"><span>${iss.text}</span><span>${pct}%</span></div>
-      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${col}"></div></div>
-    </div>`;
-  });
-}
-function renderMonthly() {
-  const w=document.getElementById('monthlyWrap');
-  if(!w)return;
-  w.innerHTML='';
-  monthly.forEach((m,i)=>{
-    w.innerHTML+=`<div class="mc" style="text-align:center">
-      <div class="lbl">${m.month}</div>
-      <div style="margin-top:4px">${
-        isAdmin?`<input type="number" min="0" max="100" value="${m.pct}" style="width:46px;font-size:13px;text-align:center;border:none;border-bottom:0.5px solid #ced4da;background:transparent;color:#000" oninput="monthly[${i}].pct=+this.value"/>`
-        :`<span style="font-size:14px;font-weight:500">${m.pct}%</span>`
-      }</div>
-    </div>`;
-  });
-}
-async function saveMonthly(){await persistAll();flash('monthNotif');}
-
 function renderAll(){
   renderMetrics();
   renderGrid();
   renderPayTable();
   renderIssues();
   renderExpenses();
-  renderIssueProgress();
-  renderMonthly();
 }
 
 // البدء بالفحص والتحميل فوراً
