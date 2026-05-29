@@ -144,13 +144,13 @@
       "id": 4,
       "text": "مشكلة القمامة المنتشرة حانب المبني",
       "pri": "med",
-      "status": "investigating"
+      "status": "pending"
     },
     {
       "id": 5,
       "text": "الاستفادة من المساحة الحرة بالأرضي",
       "pri": "med",
-      "status": "open"
+      "status": "pending"
     },
     {
       "id": 6,
