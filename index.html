@@ -1,494 +1,273 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة المبنى</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body { background: #fafafa; color: #333; }
-.dash{padding:1.25rem 1rem;direction:rtl;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
-.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px}
-.top-bar h1{font-size:19px;font-weight:500;color:#111}
-.badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;white-space:nowrap}
-.b-admin{background:#d4edda;color:#155724}
-.b-view{background:#cce5ff;color:#004085}
-.b-neighbor{background:#E6F1FB;color:#0C447C}
-.b-paid{background:#EAF3DE;color:#3B6D11}
-.b-pending{background:#FAEEDA;color:#854F0B}
-.b-empty{background:#e9ecef;color:#6c757d}
-.b-unknown{background:#FCEBEB;color:#791F1F}
-.b-open{background:#EAF3DE;color:#3B6D11}
-.b-invest{background:#E6F1FB;color:#0C447C}
-.b-done{background:#EAF3DE;color:#3B6D11}
-.pin-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
-.pin-row input{width:280px;font-size:13px;padding:5px 10px;border-radius:6px;border:0.5px solid #ced4da;background:#fff;color:#000;direction:ltr}
-.pin-row button, .issues-form button, .detail-card button, #saveExpRow button, .setup-card button{padding:6px 12px; font-size:12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer;}
-.pin-row button:hover{background:#0056b3}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1.25rem}
-.mc{background:#fff; border: 0.5px solid #dee2e6; border-radius:6px;padding:12px 10px}
-.mc .lbl{font-size:11px;color:#6c757d;margin-bottom:3px}
-.mc .val{font-size:20px;font-weight:500;color:#111}
-.mc .sub{font-size:10px;color:#6c757d;margin-top:1px}
-.tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
-.tab{font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;border:0.5px solid #ced4da;background:#fff;color:#495057}
-.tab.active{background:#007bff;color:#fff;border-color:#007bff}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.card{background:#fff;border:0.5px solid #dee2e6;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem}
-.sec-title{font-size:15px;font-weight:500;color:#111;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.flat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:7px;margin-bottom:1.25rem}
-.fc{border-radius:6px;padding:9px 5px;text-align:center;border:0.5px solid #dee2e6;background:#fff;cursor:pointer;transition:transform .1s}
-.fc:hover{transform:scale(1.05)}
-.fc .fn{font-size:14px;font-weight:500}
-.fc .fs{font-size:10px;margin-top:2px}
-.fc-paid{background:#EAF3DE;border-color:#97C459}.fc-paid .fn{color:#3B6D11}.fc-paid .fs{color:#3B6D11}
-.fc-pending{background:#FAEEDA;border-color:#EF9F27}.fc-pending .fn{color:#854F0B}.fc-pending .fs{color:#854F0B}
-.fc-empty{background:#f8f9fa}.fc-empty .fn{color:#6c757d}.fc-empty .fs{color:#6c757d}
-.fc-unknown{background:#FCEBEB;border-color:#F09595}.fc-unknown .fn{color:#791F1F}.fc-unknown .fs{color:#791F1F}
-.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1rem;font-size:11px;color:#6c757d}
-.li{display:flex;align-items:center;gap:4px}
-.ld{width:11px;height:11px;border-radius:3px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#f8f9fa;color:#495057;font-weight:500;padding:7px 9px;text-align:right;border-bottom:0.5px solid #dee2e6}
-td{padding:7px 9px;border-bottom:0.5px solid #dee2e6;color:#212529;vertical-align:middle}
-tr:last-child td{border-bottom:none}
-.flat-select{font-size:12px;padding:3px 7px;border-radius:4px;border:0.5px solid #ced4da;background:#fff;color:#495057}
-.detail-card{background:#f8f9fa;border-radius:6px;padding:12px;margin-bottom:1rem;display:none;border:0.5px solid #dee2e6;}
-.notif{font-size:11px;color:#28a745;opacity:0;transition:opacity .3s}
-.notif.show{opacity:1}
-.issues-form{display:none;flex-direction:column;gap:8px;margin-bottom:1rem;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
-.issues-form input,.issues-form select{font-size:13px; padding:5px; border:0.5px solid #ced4da; border-radius:4px;}
-.exp-input{background:transparent;border:none;border-bottom:0.5px solid #ced4da;width:80px;font-size:12px;color:#000;text-align:right;padding:1px 2px}
-.loading-overlay{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999;font-size:14px;color:#6c757d;flex-direction:column;gap:12px;text-align:center;padding:20px}
-.spinner{width:32px;height:32px;border:3px solid #e9ecef;border-top-color:#007bff;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+    <meta charset="UTF-8">
+    <title>إدارة الشكاوى والمدفوعات</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f7fa;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        h2 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .neighbor-auth {
+            background: #eef6ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        .neighbor-auth input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 180px;
+            margin-left: 10px;
+        }
+        .neighbor-auth button {
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .hint {
+            color: #0056b3;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        .complaint-form {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .complaint-form textarea, .complaint-form input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        .complaint-form button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .status-msg {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .payments-section {
+            background: #e2f5ea;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .payment-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .payment-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .color-square {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 1px solid #aaa;
+        }
+        /* الألوان فقط، دون نصوص إضافية */
+        .paid { background-color: #28a745; }
+        .pending { background-color: #ffc107; }
+        .overdue { background-color: #dc3545; }
+        .na { background-color: #6c757d; }
+    </style>
 </head>
 <body>
+<div class="container">
+    <h2>نظام الجيران - تقديم شكوى</h2>
 
-<div id="loadingOverlay" class="loading-overlay">
-  <div class="spinner"></div>
-  <span id="loadingText">جاري تحميل البيانات...</span>
-</div>
-
-<div class="dash" id="app" style="opacity:0;transition:opacity .3s">
-  <div class="top-bar">
-    <div>
-      <div style="font-size:12px;color:#6c757d;margin-bottom:3px">لوحة إدارة المبنى</div>
-      <h1><i class="ti ti-building" aria-hidden="true"></i> إدارة المبنى</h1>
+    <!-- خانة إدخال رمز الجار مع اقتراح -->
+    <div class="neighbor-auth">
+        <label for="neighborCode"><strong>رمز الجار:</strong></label>
+        <input type="password" id="neighborCode" placeholder="أدخل الرمز" maxlength="4">
+        <button onclick="authenticateNeighbor()">تأكيد</button>
+        <span class="hint">💡 أدخل <strong>1234</strong> إذا كنت تريد تقديم شكوى</span>
+        <p id="authStatus" style="margin-top:10px; color: green;"></p>
     </div>
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-      <span class="badge b-view" id="modeBadge">وضع المشاهدة</span>
-      <span class="badge b-admin" id="adminBadge" style="display:none"></span>
-      <span style="font-size:11px;color:#6c757d" id="lastUpdated"></span>
+
+    <!-- نموذج الشكوى (يظهر بعد التحقق) -->
+    <div id="complaintSection" class="complaint-form" style="display: none;">
+        <h3>تقديم شكوى جديدة</h3>
+        <input type="text" id="complaintTitle" placeholder="عنوان الشكوى">
+        <textarea id="complaintBody" rows="4" placeholder="وصف الشكوى..."></textarea>
+        <button onclick="submitComplaint()">إرسال الشكوى</button>
+        <p id="complaintStatus" class="status-msg"></p>
     </div>
-  </div>
 
-  <div class="pin-row">
-    <input type="password" id="tokenInput" placeholder="أدخل كلمة المرور أو كود الإدارة..." />
-    <button onclick="saveTokenAndLogin()" id="loginBtn"><i class="ti ti-key" aria-hidden="true"></i> دخول</button>
-    <span class="notif" id="loginNotif">تم التفعيل ✓</span>
-    <button onclick="logout()" id="logoutBtn" style="display:none; background:#dc3545;">تسجيل الخروج</button>
-    <button onclick="loadData()" style="font-size:11px;padding:4px 10px; background:#17a2b8"><i class="ti ti-refresh" aria-hidden="true"></i> تحديث البيانات</button>
-  </div>
-
-  <div class="metrics" id="metricsRow"></div>
-
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('payments',this)"><i class="ti ti-coin" aria-hidden="true"></i> المدفوعات</button>
-    <button class="tab" onclick="switchTab('issues',this)"><i class="ti ti-tool" aria-hidden="true"></i> المشاكل</button>
-    <button class="tab" onclick="switchTab('expenses',this)"><i class="ti ti-receipt" aria-hidden="true"></i> المصاريف</button>
-  </div>
-
-  <div id="tab-payments" class="tab-content active">
-    <div class="sec-title"><i class="ti ti-home" aria-hidden="true"></i> حالة الشقق</div>
-    <div class="legend">
-      <div class="li"><div class="ld" style="background:#97C459"></div>دفع</div>
-      <div class="li"><div class="ld" style="background:#EF9F27"></div>وافق / لم يدفع</div>
-      <div class="li"><div class="ld" style="background:#F09595"></div>لم نصل إليه</div>
-      <div class="li"><div class="ld" style="background:#f8f9fa;border:0.5px solid #dee2e6"></div>فارغة</div>
+    <h2>حالة الدفعات (بالألوان فقط)</h2>
+    <div class="payments-section">
+        <p>تظهر حالة كل شقة بلون المربع فقط:</p>
+        <div class="payment-grid" id="paymentGrid">
+            <!-- ستُملأ ديناميكياً -->
+        </div>
     </div>
-    <div class="flat-grid" id="flatGrid"></div>
-    <div class="detail-card" id="detailCard"></div>
-  </div>
-
-  <div id="tab-issues" class="tab-content">
-    <div class="issues-form" id="issueForm">
-      <div style="font-size:13px;font-weight:500;color:#111">إضافة مشكلة جديدة</div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="newIssueText" placeholder="وصف المشكلة..." style="flex:1;"/>
-        <button onclick="addIssue()" style="font-size:12px;padding:4px 12px"><i class="ti ti-plus" aria-hidden="true"></i> إضافة</button>
-        <span class="notif" id="issueNotif">تمت الإضافة ✓</span>
-      </div>
-    </div>
-    <div class="card"><table><thead><tr><th>#</th><th>المشكلة</th><th>الحالة</th><th id="issueEditCol" style="display:none">تعديل</th></tr></thead><tbody id="issuesTbody"></tbody></table></div>
-  </div>
-
-  <div id="tab-expenses" class="tab-content">
-    <div class="sec-title"><i class="ti ti-wallet" aria-hidden="true"></i> المصاريف الشهرية المشتركة</div>
-    <div class="card">
-      <table><thead><tr><th>البند</th><th>المبلغ (جنيه)</th></tr></thead>
-      <tbody id="expTbody"></tbody>
-      <tfoot><tr><td style="font-weight:500;padding:8px 9px">الإجمالي</td><td style="padding:8px 9px;font-weight:500" id="expTotal">0 ج</td></tr></tfoot></table>
-      <div id="saveExpRow" style="margin-top:12px;display:none">
-        <button onclick="saveExpenses()" style="font-size:12px;padding:4px 12px"><i class="ti ti-device-floppy" aria-hidden="true"></i> حفظ المصاريف</button>
-        <span class="notif" id="expNotif" style="margin-right:8px">تم الحفظ ✓</span>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
-// ==================== [ إعدادات جيت هاب الخاصة بك ] ====================
-const GH_OWNER = "abdo78-max"; 
-const GH_REPO  = "Building_162"; 
-const GH_PATH  = "data.json";             
-const NEIGHBOR_TOKEN = "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";
-// ======================================================================
+    // ========== الإعدادات – عدّلها بما يناسب مستودعك على GitHub ==========
+    const REPO_OWNER = "YOUR_GITHUB_USERNAME";       // غيّر إلى اسم المستخدم الخاص بك
+    const REPO_NAME = "YOUR_REPO_NAME";             // غيّر إلى اسم المستودع
+    // ====================================================================
 
-// متغيرات الصلاحيات في الذاكرة فقط (بدون Local Storage)
-let role = 'view'; // المتاح: 'view', 'neighbor', 'admin'
-let activeAdminToken = ''; 
-let fileSha = ""; 
+    // التوكن الخاص بالجار (يُستخدم فقط عند إدخال 1234)
+    const NEIGHBOR_TOKEN = "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";
 
-let flats = [], issues = [], expenses = [];
-const statusLabel = {agreed:"وافق على الدفع", empty:"لا أحد", maybe:"ربما لا أحد", unknown:"لم نصل إليه"};
+    let isNeighborAuthenticated = false;
 
-// جلب التوكن المناسب بناءً على الدور الحالي
-function getToken() {
-  if (role === 'admin') return activeAdminToken;
-  if (role === 'neighbor') return NEIGHBOR_TOKEN;
-  return null;
-}
-
-// تحميل البيانات من GitHub
-async function loadData() {
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  document.getElementById('loadingText').textContent = "جاري تحديث البيانات...";
-  
-  const token = getToken();
-  const headers = { "Accept": "application/vnd.github+json" };
-  if (token) {
-    headers["Authorization"] = `token ${token}`;
-  }
-
-  try {
-    const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}?nocache=${new Date().getTime()}`, { headers });
-    
-    if (!response.ok) {
-      throw new Error("فشل الوصول للملف.");
+    // عند الضغط على تأكيد رمز الجار
+    function authenticateNeighbor() {
+        const code = document.getElementById('neighborCode').value.trim();
+        const statusEl = document.getElementById('authStatus');
+        if (code === '1234') {
+            isNeighborAuthenticated = true;
+            statusEl.textContent = '✅ تم التحقق، يمكنك الآن تقديم شكوى.';
+            statusEl.style.color = 'green';
+            document.getElementById('complaintSection').style.display = 'block';
+        } else {
+            isNeighborAuthenticated = false;
+            statusEl.textContent = '❌ الرمز غير صحيح.';
+            statusEl.style.color = 'red';
+            document.getElementById('complaintSection').style.display = 'none';
+        }
+        // لا تخزين محلي مطلقاً
     }
 
-    const json = await response.json();
-    fileSha = json.sha; 
+    // تقديم الشكوى وحفظها كـ GitHub issue مع label "waiting"
+    async function submitComplaint() {
+        if (!isNeighborAuthenticated) {
+            alert('يجب التحقق من رمز الجار أولاً (1234).');
+            return;
+        }
 
-    const decodedText = decodeURIComponent(atob(json.content).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+        const title = document.getElementById('complaintTitle').value.trim();
+        const body = document.getElementById('complaintBody').value.trim();
+        if (!title || !body) {
+            alert('يرجى ملء العنوان والوصف.');
+            return;
+        }
 
-    const serverData = JSON.parse(decodedText);
-    flats    = serverData.flats || [];
-    issues   = serverData.issues || [];
-    expenses = serverData.expenses || [];
+        const statusEl = document.getElementById('complaintStatus');
+        statusEl.textContent = 'جارٍ حفظ الشكوى...';
+        statusEl.style.color = 'blue';
 
-    if (serverData.lastUpdated) {
-      document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + serverData.lastUpdated;
+        // إعداد بيانات الـ issue مع label "waiting" كحالة افتراضية
+        const issueData = {
+            title: title,
+            body: body + "\n\n---\nالحالة: waiting (تلقائي)",
+            labels: ["waiting"]
+        };
+
+        try {
+            const response = await fetch(
+                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${NEIGHBOR_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(issueData)
+                }
+            );
+
+            if (response.ok) {
+                const issue = await response.json();
+                statusEl.textContent = `✅ تم حفظ الشكوى بنجاح (رقم #${issue.number}) في حالة انتظار.`;
+                statusEl.style.color = 'green';
+                // تفريغ الحقول
+                document.getElementById('complaintTitle').value = '';
+                document.getElementById('complaintBody').value = '';
+            } else {
+                const err = await response.json();
+                statusEl.textContent = `❌ فشل الحفظ: ${err.message}`;
+                statusEl.style.color = 'red';
+            }
+        } catch (error) {
+            statusEl.textContent = `❌ خطأ في الاتصال: ${error.message}`;
+            statusEl.style.color = 'red';
+        }
     }
-    
-    renderAll();
-  } catch(e) {
-    console.error("خطأ أثناء جلب البيانات:", e);
-    alert("فشل في تحميل البيانات، يرجى التحقق من اتصال الإنترنت أو صحة الكود المُدخل.");
-  }
-  
-  document.getElementById('loadingOverlay').style.display = 'none';
-  document.getElementById('app').style.opacity = '1';
-}
 
-// رفع وحفظ التعديلات إلى GitHub
-async function persistAll() {
-  const token = getToken();
-  if (!token) {
-    alert("أنت في وضع المشاهدة فقط.");
-    return;
-  }
+    // ========== صفحة الدفعات (مربعات ملونة فقط، بدون نصوص مكررة) ==========
+    function renderPayments() {
+        // بيانات افتراضية للشقق والدفعات (تستبدل بمصدر بياناتك الحقيقي)
+        const apartments = [
+            { name: "شقة 1", status: "paid" },
+            { name: "شقة 2", status: "pending" },
+            { name: "شقة 3", status: "overdue" },
+            { name: "شقة 4", status: "paid" },
+            { name: "شقة 5", status: "na" },
+        ];
 
-  const now = new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  const payload = { flats, issues, expenses, lastUpdated: now };
-  
-  const jsonString = JSON.stringify(payload, null, 2);
-  const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-      return String.fromCharCode('0x' + p1);
-  }));
+        const grid = document.getElementById('paymentGrid');
+        grid.innerHTML = '';
 
-  try {
-    const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
-       headers: { "Authorization": `token ${token}` }
+        apartments.forEach(apt => {
+            const item = document.createElement('div');
+            item.className = 'payment-item';
+
+            const square = document.createElement('div');
+            square.className = `color-square ${apt.status}`;
+
+            // التسمية تكون باسم الشقة فقط (بدون نص الحالة)
+            const label = document.createElement('span');
+            label.textContent = apt.name;
+
+            item.appendChild(square);
+            item.appendChild(label);
+            grid.appendChild(item);
+        });
+    }
+
+    // تشغيل عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+        renderPayments();
+        // أي بيانات سابقة من localStorage لن تُستخدم، بل تم حذفها
     });
-    if(getRes.ok) {
-       const getJson = await getRes.json();
-       if(getJson.sha) fileSha = getJson.sha;
-    }
-
-    const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
-      method: 'PUT',
-      headers: { 
-        'Authorization': `token ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github+json'
-      },
-      body: JSON.stringify({
-        message: `تحديث البيانات - ${now}`,
-        content: base64Content,
-        sha: fileSha
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error("فشل الرفع: " + errText);
-    }
-    
-    const resJson = await response.json();
-    fileSha = resJson.content.sha; 
-    document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + now;
-  } catch(e) {
-    console.error("خطأ في رفع البيانات:", e);
-    alert("حدث خطأ أثناء حفظ البيانات على سيرفر GitHub.");
-  }
-}
-
-// معالجة كود الدخول والتحقق منه
-function saveTokenAndLogin() {
-  const inputVal = document.getElementById('tokenInput').value.trim();
-  if (!inputVal) return;
-
-  if (inputVal === '1234') {
-    role = 'neighbor';
-    activeAdminToken = '';
-  } else {
-    role = 'admin';
-    activeAdminToken = inputVal;
-  }
-  
-  checkTokenState();
-  loadData(); 
-  flash('loginNotif');
-}
-
-// تحديث واجهة المستخدم بناءً على نوع الصلاحية النشطة
-function checkTokenState() {
-  const modeBadge = document.getElementById('modeBadge');
-  const adminBadge = document.getElementById('adminBadge');
-  const tokenInput = document.getElementById('tokenInput');
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  
-  const saveExpRow = document.getElementById('saveExpRow');
-  const issueEditCol = document.getElementById('issueEditCol');
-  const issueForm = document.getElementById('issueForm');
-
-  if (role === 'admin') {
-    modeBadge.textContent = "وضع الإدارة الكاملة";
-    modeBadge.className = "badge b-admin";
-    
-    adminBadge.style.display = 'none';
-    tokenInput.style.display = 'none';
-    loginBtn.style.display = 'none';
-    logoutBtn.style.display  = 'inline-block';
-    
-    saveExpRow.style.display  = 'block';
-    issueEditCol.style.display  = 'table-cell';
-    issueForm.style.display = 'flex';
-
-  } else if (role === 'neighbor') {
-    modeBadge.textContent = "وضع الساكن";
-    modeBadge.className = "badge b-neighbor";
-    
-    adminBadge.style.display = 'inline-block';
-    adminBadge.textContent = "مخوّل لإضافة المشاكل والشكاوى فقط";
-    adminBadge.className = "badge b-invest";
-    
-    tokenInput.style.display = 'none';
-    loginBtn.style.display = 'none';
-    logoutBtn.style.display  = 'inline-block';
-    
-    saveExpRow.style.display  = 'none';
-    issueEditCol.style.display  = 'none';
-    issueForm.style.display = 'flex';
-
-  } else {
-    // وضع المشاهدة الافتراضي لقراءة البيانات فقط
-    modeBadge.textContent = "وضع المشاهدة";
-    modeBadge.className = "badge b-view";
-    adminBadge.style.display = 'none';
-    
-    tokenInput.style.display = 'inline-block';
-    tokenInput.value = '';
-    loginBtn.style.display = 'inline-block';
-    logoutBtn.style.display  = 'none';
-    
-    saveExpRow.style.display  = 'none';
-    issueEditCol.style.display  = 'none';
-    issueForm.style.display = 'none';
-  }
-}
-
-function logout() {
-  role = 'view';
-  activeAdminToken = '';
-  checkTokenState();
-  closeDetail();
-  renderAll();
-}
-
-function flash(id) {
-  const el = document.getElementById(id);
-  if(el){ el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2000); }
-}
-
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function fcClass(f) {
-  if (f.paid) return 'fc fc-paid';
-  if (f.status==='agreed') return 'fc fc-pending';
-  if (f.status==='unknown') return 'fc fc-unknown';
-  return 'fc fc-empty';
-}
-function fcLabel(f) {
-  if (f.paid) return 'دفع';
-  if (f.status==='agreed') return 'لم يدفع';
-  if (f.status==='unknown') return 'لم نصل';
-  return 'فارغة';
-}
-function renderGrid() {
-  const g = document.getElementById('flatGrid');
-  g.innerHTML='';
-  flats.forEach(f=>{
-    const d=document.createElement('div');
-    d.className=fcClass(f);
-    d.innerHTML=`<div class="fn">${f.id}</div><div class="fs">${fcLabel(f)}</div>`;
-    d.onclick=()=>openDetail(f);
-    g.appendChild(d);
-  });
-}
-function openDetail(f) {
-  const c=document.getElementById('detailCard');
-  c.style.display='block';
-  let editHtml='';
-  if (role === 'admin') {
-    editHtml=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <select class="flat-select" id="ds_${f.id}">
-        <option value="empty"   ${f.status==='empty'?'selected':''}>لا أحد</option>
-        <option value="maybe"   ${f.status==='maybe'?'selected':''}>ربما لا أحد</option>
-        <option value="agreed"  ${f.status==='agreed'?'selected':''}>وافق على الدفع</option>
-        <option value="unknown" ${f.status==='unknown'?'selected':''}>لم نصل إليه</option>
-      </select>
-      <select class="flat-select" id="dp_${f.id}">
-        <option value="false" ${!f.paid?'selected':''}>لم يدفع بعد</option>
-        <option value="true"  ${f.paid?'selected':''}>دفع</option>
-      </select>
-      <button style="font-size:12px;padding:4px 10px" onclick="saveFlatDetail(${f.id})"><i class="ti ti-check" aria-hidden="true"></i> حفظ التعديل</button>
-      <span class="notif" id="dn_${f.id}">✓</span>
-    </div>`;
-  }
-  c.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <span style="font-size:14px;font-weight:500">شقة رقم ${f.id}</span>
-    <button style="font-size:11px;padding:2px 8px; background:#6c757d; color:#fff; border:none; border-radius:3px;" onclick="closeDetail()">✕</button>
-  </div>
-  <div style="font-size:12px;color:#6c757d">الساكن: <strong style="color:#111">${statusLabel[f.status]}</strong></div>
-  <div style="font-size:12px;color:#6c757d;margin-top:4px">الدفع: <strong style="color:#111">${f.paid?'دفع':(f.status==='agreed'?'لم يدفع بعد':'لا يوجد')}</strong></div>
-  ${editHtml}`;
-}
-function closeDetail(){document.getElementById('detailCard').style.display='none';}
-async function saveFlatDetail(id) {
-  const f=flats.find(x=>x.id===id);
-  f.status=document.getElementById('ds_'+id).value;
-  f.paid=document.getElementById('dp_'+id).value==='true';
-  await persistAll();
-  flash('dn_'+id);
-  renderAll();
-  openDetail(f);
-}
-
-function renderIssues() {
-  const tb=document.getElementById('issuesTbody');
-  tb.innerHTML='';
-  const stMap={pending:'<span class="badge b-pending">انتظار</span>',open:'<span class="badge b-open">مفتوحة</span>',investigating:'<span class="badge b-invest">جارٍ</span>',done:'<span class="badge b-done">منجزة</span>'};
-  issues.forEach(iss=>{
-    let editTd='';
-    if (role === 'admin') {
-      editTd=`<td><select class="flat-select" onchange="changeIssueStatus(${iss.id},this.value)">
-        <option value="pending" ${iss.status==='pending'?'selected':''}>انتظار</option>
-        <option value="investigating" ${iss.status==='investigating'?'selected':''}>جارٍ</option>
-        <option value="open" ${iss.status==='open'?'selected':''}>مفتوحة</option>
-        <option value="done" ${iss.status==='done'?'selected':''}>منجزة</option>
-      </select></td>`;
-    }
-    tb.innerHTML+=`<tr><td>${iss.id}</td><td>${iss.text}</td><td>${stMap[iss.status]||''}</td>${editTd}</tr>`;
-  });
-}
-async function changeIssueStatus(id,val) {
-  const iss=issues.find(x=>x.id===id);
-  if(iss){iss.status=val; await persistAll(); renderIssues();}
-}
-async function addIssue() {
-  const txt=document.getElementById('newIssueText').value.trim();
-  if(!txt)return;
-  // تنزل المشكلة تلقائياً على حالة الانتظار (pending)
-  issues.push({id:issues.length+1,text:txt,pri:'med',status:'pending'});
-  document.getElementById('newIssueText').value='';
-  await persistAll();
-  flash('issueNotif');
-  renderIssues();
-}
-
-function renderExpenses() {
-  const tb=document.getElementById('expTbody');
-  tb.innerHTML='';
-  expenses.forEach((e,i)=>{
-    tb.innerHTML+=`<tr><td>${e.label}</td><td>${
-      role === 'admin' ?`<input class="exp-input" type="number" value="${e.amount}" min="0" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
-      :`<span>${Number(e.amount).toLocaleString()} ج</span>`
-    }</td></tr>`;
-  });
-  updateExpTotal();
-}
-function updateExpTotal(){
-  document.getElementById('expTotal').textContent=expenses.reduce((s,e)=>s+Number(e.amount),0).toLocaleString()+' ج';
-}
-async function saveExpenses(){await persistAll();flash('expNotif');}
-
-function renderMetrics() {
-  const agreed=flats.filter(f=>f.status==='agreed').length;
-  const paid=flats.filter(f=>f.paid).length;
-  const empty=flats.filter(f=>f.status==='empty'||f.status==='maybe').length;
-  const doneIss=issues.filter(i=>i.status==='done').length;
-  document.getElementById('metricsRow').innerHTML=`
-    <div class="mc"><div class="lbl">إجمالي الشقق</div><div class="val">${flats.length}</div></div>
-    <div class="mc"><div class="lbl">المشتركون بالسداد</div><div class="val">${agreed}</div></div>
-    <div class="mc"><div class="lbl">المسددين فعلياً</div><div class="val">${paid}</div></div>
-    <div class="mc"><div class="lbl">شقق فارغة</div><div class="val">${empty}</div></div>
-    <div class="mc"><div class="lbl">طلبات منجزة</div><div class="val">${doneIss}/${issues.length}</div></div>`;
-}
-
-function renderAll(){
-  renderMetrics();
-  renderGrid();
-  renderIssues();
-  renderExpenses();
-}
-
-// الفحص والتحميل الأولي بوضع المشاهدة الافتراضي عند فتح الرابط
-checkTokenState();
-loadData();
 </script>
 </body>
 </html>
