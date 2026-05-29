@@ -64,6 +64,7 @@
     .loading-overlay{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999;font-size:14px;color:#6c757d;flex-direction:column;gap:12px;text-align:center;padding:20px}
     .spinner{width:32px;height:32px;border:3px solid #e9ecef;border-top-color:#007bff;border-radius:50%;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
+    .error-banner{background:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-bottom:1rem;font-size:13px;display:none}
   </style>
 </head>
 <body>
@@ -86,6 +87,9 @@
       <span style="font-size:11px;color:#6c757d" id="lastUpdated"></span>
     </div>
   </div>
+
+  <!-- رسالة خطأ واضحة -->
+  <div class="error-banner" id="errorBanner"></div>
 
   <!-- مدير النظام -->
   <div class="pin-row" id="adminPinRow">
@@ -159,8 +163,8 @@ const GH_REPO  = "Building_162";
 const GH_PATH  = "data.json";
 // =========================================================
 
-// الرمز الثابت الخاص بالجار
-const NEIGHBOR_TOKEN = "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";
+// ⚠️ غيّر السطر ده بتوكن الجار الجديد الصالح
+const NEIGHBOR_TOKEN = "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"; // 👈 بدّله بتوكن صالح
 
 let isAdmin = false;
 let isNeighbor = false;
@@ -191,7 +195,6 @@ function determineRole() {
 function updateRoleUI() {
   determineRole();
   
-  // المدير
   const adminBadge = document.getElementById('adminBadge');
   const adminLogoutBtn = document.getElementById('adminLogoutBtn');
   const modeBadge = document.getElementById('modeBadge');
@@ -237,12 +240,10 @@ function updateRoleUI() {
     issueForm.style.display = 'none';
   }
   
-  // حقل المدير يظل مرئياً دائماً، وحقل الجار يظل مرئياً أيضاً
   document.getElementById('adminPinRow').style.display = 'flex';
   document.getElementById('neighborPinRow').style.display = 'flex';
 }
 
-// الحصول على الرمز المناسب للعمليات
 function getCurrentToken() {
   if (isAdmin) {
     return localStorage.getItem('gh_bldg_token') || "";
@@ -259,7 +260,6 @@ function adminLogin() {
   const tok = document.getElementById('tokenInput').value.trim();
   if (!tok) return;
   localStorage.setItem('gh_bldg_token', tok);
-  // إزالة صلاحية الجار إن وجدت لضمان أولوية المدير
   localStorage.removeItem('neighbor_authenticated');
   flash('adminLoginNotif');
   updateRoleUI();
@@ -279,9 +279,6 @@ function neighborLogin() {
   const pass = document.getElementById('neighborPassInput').value.trim();
   if (pass === '1234') {
     localStorage.setItem('neighbor_authenticated', 'true');
-    // إزالة المدير إذا كان موجوداً (الجار لا يلغي المدير بل نعطيه الأولوية في determineRole)
-    // لكن حسب الأولوية المدير يسبق، لذا إذا كان المدير موجوداً لن يصبح الجار.
-    // لذا نتحقق: إذا كان المدير غير موجود، سيصبح الجار.
     flash('neighborLoginNotif');
     updateRoleUI();
     loadData();
@@ -300,19 +297,48 @@ function neighborLogout() {
 }
 
 // -----------------------------------------------
+//  عرض رسائل الخطأ
+// -----------------------------------------------
+function showError(msg) {
+  const banner = document.getElementById('errorBanner');
+  banner.textContent = msg;
+  banner.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('errorBanner').style.display = 'none';
+}
+
+// -----------------------------------------------
 //  تحميل البيانات
 // -----------------------------------------------
 async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('loadingText').textContent = "جاري تحديث البيانات...";
+  hideError();
   
+  // تحذير إذا كان الرابط محلي
+  if (window.location.protocol === 'file:') {
+    showError('⚠️ فتحت الملف مباشرة من الجهاز. ارفعه على GitHub Pages أو سيرفر عشان يشتغل.');
+  }
+
   const token = getCurrentToken();
   const headers = { "Accept": "application/vnd.github+json" };
   if (token) headers["Authorization"] = `token ${token}`;
 
   try {
     const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}?nocache=${new Date().getTime()}`, { headers });
-    if (!response.ok) throw new Error("فشل الوصول للملف.");
+    
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("الصلاحية مرفوضة. تأكد من التوكن أو أن المستودع ليس خاصاً.");
+      } else if (response.status === 404) {
+        throw new Error("الملف غير موجود. تأكد من اسم المستودع والمسار.");
+      } else {
+        throw new Error("فشل الاتصال بالخادم.");
+      }
+    }
     
     const json = await response.json();
     fileSha = json.sha;
@@ -330,10 +356,13 @@ async function loadData() {
       document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + serverData.lastUpdated;
     }
     
+    hideError();
     renderAll();
   } catch(e) {
     console.error("خطأ أثناء جلب البيانات:", e);
-    alert("فشل في تحميل البيانات الحالية، يرجى التحقق من اتصال الإنترنت أو صلاحية الكود.");
+    showError("❌ " + e.message + " - جرب تسجيل الدخول كمدير بتوكن صالح، أو تأكد من رفع الصفحة على GitHub Pages.");
+    // عرض واجهة فارغة بدل ما تفضل فاضية تمام
+    renderAll(); // هتظهر الأقسام فاضية لكن الصفحة شغالة
   }
   
   document.getElementById('loadingOverlay').style.display = 'none';
@@ -383,8 +412,8 @@ async function persistAll() {
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      throw new Error("فشل الرفع: " + errText);
+      const err = await response.json();
+      throw new Error(err.message || "فشل الحفظ.");
     }
     
     const resJson = await response.json();
@@ -392,7 +421,7 @@ async function persistAll() {
     document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + now;
   } catch(e) {
     console.error("خطأ في رفع البيانات:", e);
-    alert("حدث خطأ أثناء حفظ البيانات. تأكد من صلاحيات الكود المستخدم.");
+    alert("حدث خطأ أثناء الحفظ: " + e.message);
   }
 }
 
@@ -425,7 +454,7 @@ function fcLabel(f) {
 }
 
 // -----------------------------------------------
-//  عرض الشقق (بدون جدول مكرر)
+//  عرض الشقق
 // -----------------------------------------------
 function renderGrid() {
   const g = document.getElementById('flatGrid');
@@ -443,7 +472,7 @@ function openDetail(f) {
   const c=document.getElementById('detailCard');
   c.style.display='block';
   let editHtml='';
-  if (isAdmin) { // المدير فقط يمكنه التعديل
+  if (isAdmin) {
     editHtml=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <select class="flat-select" id="ds_${f.id}">
         <option value="empty"   ${f.status==='empty'?'selected':''}>لا أحد</option>
@@ -494,7 +523,7 @@ function renderIssues() {
   };
   issues.forEach(iss=>{
     let editTd='';
-    if (isAdmin) { // المدير فقط يعدل الحالة
+    if (isAdmin) {
       editTd=`<td><select class="flat-select" onchange="changeIssueStatus(${iss.id},this.value)">
         <option value="pending" ${iss.status==='pending'?'selected':''}>انتظار</option>
         <option value="investigating" ${iss.status==='investigating'?'selected':''}>جارٍ</option>
@@ -507,7 +536,7 @@ function renderIssues() {
 }
 
 async function changeIssueStatus(id,val) {
-  if (!isAdmin) return; // أمان
+  if (!isAdmin) return;
   const iss=issues.find(x=>x.id===id);
   if(iss){iss.status=val; await persistAll(); renderIssues();}
 }
