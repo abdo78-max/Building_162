@@ -159,12 +159,8 @@ const GH_REPO  = "Building_162";
 const GH_PATH  = "data.json";
 // =========================================================
 
-/*
-  ⚠️ هام: استبدل السطر التالي برمز الجار الجديد الذي أنشأته.
-  يجب أن يكون الرمز من نوع classic وله صلاحية repo كاملة.
-  مثال: const NEIGHBOR_TOKEN = "github_pat_...";
-*/
-const NEIGHBOR_TOKEN = "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"; // 👈 غيّره هنا
+// الرمز الثابت الخاص بالجار
+const NEIGHBOR_TOKEN = "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";
 
 let isAdmin = false;
 let isNeighbor = false;
@@ -195,6 +191,7 @@ function determineRole() {
 function updateRoleUI() {
   determineRole();
   
+  // المدير
   const adminBadge = document.getElementById('adminBadge');
   const adminLogoutBtn = document.getElementById('adminLogoutBtn');
   const modeBadge = document.getElementById('modeBadge');
@@ -240,10 +237,12 @@ function updateRoleUI() {
     issueForm.style.display = 'none';
   }
   
+  // حقل المدير يظل مرئياً دائماً، وحقل الجار يظل مرئياً أيضاً
   document.getElementById('adminPinRow').style.display = 'flex';
   document.getElementById('neighborPinRow').style.display = 'flex';
 }
 
+// الحصول على الرمز المناسب للعمليات
 function getCurrentToken() {
   if (isAdmin) {
     return localStorage.getItem('gh_bldg_token') || "";
@@ -260,6 +259,7 @@ function adminLogin() {
   const tok = document.getElementById('tokenInput').value.trim();
   if (!tok) return;
   localStorage.setItem('gh_bldg_token', tok);
+  // إزالة صلاحية الجار إن وجدت لضمان أولوية المدير
   localStorage.removeItem('neighbor_authenticated');
   flash('adminLoginNotif');
   updateRoleUI();
@@ -279,6 +279,9 @@ function neighborLogin() {
   const pass = document.getElementById('neighborPassInput').value.trim();
   if (pass === '1234') {
     localStorage.setItem('neighbor_authenticated', 'true');
+    // إزالة المدير إذا كان موجوداً (الجار لا يلغي المدير بل نعطيه الأولوية في determineRole)
+    // لكن حسب الأولوية المدير يسبق، لذا إذا كان المدير موجوداً لن يصبح الجار.
+    // لذا نتحقق: إذا كان المدير غير موجود، سيصبح الجار.
     flash('neighborLoginNotif');
     updateRoleUI();
     loadData();
@@ -309,7 +312,7 @@ async function loadData() {
 
   try {
     const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}?nocache=${new Date().getTime()}`, { headers });
-    if (!response.ok) throw new Error("فشل الوصول للملف. تأكد من التوكن.");
+    if (!response.ok) throw new Error("فشل الوصول للملف.");
     
     const json = await response.json();
     fileSha = json.sha;
@@ -330,7 +333,7 @@ async function loadData() {
     renderAll();
   } catch(e) {
     console.error("خطأ أثناء جلب البيانات:", e);
-    alert("فشل في تحميل البيانات. " + e.message);
+    alert("فشل في تحميل البيانات الحالية، يرجى التحقق من اتصال الإنترنت أو صلاحية الكود.");
   }
   
   document.getElementById('loadingOverlay').style.display = 'none';
@@ -356,7 +359,7 @@ async function persistAll() {
   ));
 
   try {
-    // تحديث SHA قبل الحفظ
+    // تحديث SHA
     const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
        headers: token ? { "Authorization": `token ${token}` } : {}
     });
@@ -380,8 +383,8 @@ async function persistAll() {
     });
 
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || "فشل الحفظ، تحقق من صلاحية التوكن.");
+      const errText = await response.text();
+      throw new Error("فشل الرفع: " + errText);
     }
     
     const resJson = await response.json();
@@ -389,7 +392,7 @@ async function persistAll() {
     document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + now;
   } catch(e) {
     console.error("خطأ في رفع البيانات:", e);
-    alert("حدث خطأ أثناء الحفظ: " + e.message + "\nتأكد من أن التوكن صالح وله صلاحية repo.");
+    alert("حدث خطأ أثناء حفظ البيانات. تأكد من صلاحيات الكود المستخدم.");
   }
 }
 
@@ -440,7 +443,7 @@ function openDetail(f) {
   const c=document.getElementById('detailCard');
   c.style.display='block';
   let editHtml='';
-  if (isAdmin) {
+  if (isAdmin) { // المدير فقط يمكنه التعديل
     editHtml=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <select class="flat-select" id="ds_${f.id}">
         <option value="empty"   ${f.status==='empty'?'selected':''}>لا أحد</option>
@@ -491,7 +494,7 @@ function renderIssues() {
   };
   issues.forEach(iss=>{
     let editTd='';
-    if (isAdmin) {
+    if (isAdmin) { // المدير فقط يعدل الحالة
       editTd=`<td><select class="flat-select" onchange="changeIssueStatus(${iss.id},this.value)">
         <option value="pending" ${iss.status==='pending'?'selected':''}>انتظار</option>
         <option value="investigating" ${iss.status==='investigating'?'selected':''}>جارٍ</option>
@@ -504,7 +507,7 @@ function renderIssues() {
 }
 
 async function changeIssueStatus(id,val) {
-  if (!isAdmin) return;
+  if (!isAdmin) return; // أمان
   const iss=issues.find(x=>x.id===id);
   if(iss){iss.status=val; await persistAll(); renderIssues();}
 }
