@@ -163,6 +163,12 @@
       "text": "مشكلة القمامة ( البلاط ) في الدور الخامس",
       "pri": "high",
       "status": "pending"
+    },
+    {
+      "id": 8,
+      "text": "زبالة جمب العمارة",
+      "pri": "med",
+      "status": "pending"
     }
   ],
   "expenses": [
@@ -175,5 +181,5 @@
       "amount": 0
     }
   ],
-  "lastUpdated": "٢٩ مايو ٢٠٢٦ في ٠٦:٠٦ م"
+  "lastUpdated": "٢٩ مايو ٢٠٢٦ في ٠٧:١٢ م"
 }
