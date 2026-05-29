@@ -14,7 +14,6 @@ body { background: #fafafa; color: #333; }
 .badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .b-admin{background:#d4edda;color:#155724}
 .b-view{background:#cce5ff;color:#004085}
-.b-neighbor{background:#fff3cd;color:#856404}
 .b-paid{background:#EAF3DE;color:#3B6D11}
 .b-pending{background:#FAEEDA;color:#854F0B}
 .b-empty{background:#e9ecef;color:#6c757d}
@@ -81,15 +80,14 @@ tr:last-child td{border-bottom:none}
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <span class="badge b-view" id="modeBadge">وضع المشاهدة</span>
-      <span class="badge b-neighbor" id="neighborBadge" style="display:none">جار (مشاكل فقط)</span>
-      <span class="badge b-admin" id="adminBadge" style="display:none">مدير (تحرير كامل)</span>
+      <span class="badge b-admin" id="adminBadge" style="display:none">مدير (مخوّل للرفع)</span>
       <span style="font-size:11px;color:#6c757d" id="lastUpdated"></span>
     </div>
   </div>
 
   <div class="pin-row">
-    <input type="password" id="tokenInput" placeholder="أدخل كود الصلاحية أو كلمة مرور الجار..." style="width: 260px;"/>
-    <button onclick="saveTokenAndLogin()"><i class="ti ti-key" aria-hidden="true"></i> تفعيل الصلاحية</button>
+    <input type="password" id="tokenInput" placeholder="أدخل كود الصلاحية لتفعيل الحفظ..." style="width: 260px;"/>
+    <button onclick="saveTokenAndLogin()"><i class="ti ti-key" aria-hidden="true"></i> تفعيل صلاحية الحفظ</button>
     <span class="notif" id="loginNotif">تم التفعيل ✓</span>
     <button onclick="logout()" id="logoutBtn" style="display:none; background:#dc3545;">إلغاء الصلاحية</button>
     <button onclick="loadData()" style="font-size:11px;padding:4px 10px; background:#17a2b8"><i class="ti ti-refresh" aria-hidden="true"></i> تحديث البيانات</button>
@@ -144,13 +142,12 @@ tr:last-child td{border-bottom:none}
 
 <script>
 // ==================== [ إعدادات جيت هاب الخاصة بك ] ====================
-const GH_OWNER = "abdo78-max"; 
-const GH_REPO  = "Building_162"; 
+const GH_OWNER = "abdo78-max"; // اسم حسابك
+const GH_REPO  = "Building_162"; // اسم الـ Repository مع مراعاة الحروف الكابيتال
 const GH_PATH  = "data.json";             
 // ======================================================================
-const NEIGHBOR_TOKEN = "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";
 
-let currentRole = 'viewer'; // 'viewer', 'neighbor', 'admin'
+let isAdmin = false;
 let fileSha = ""; 
 
 let flats = [], issues = [], expenses = [];
@@ -204,7 +201,7 @@ async function loadData() {
 async function persistAll() {
   const token = localStorage.getItem('gh_bldg_token');
   if (!token) {
-    alert("أنت في وضع المشاهدة فقط. لتعديل البيانات وحفظها، يرجى إدخال كود صلاحية الحفظ أو كلمة مرور الجار أولاً.");
+    alert("أنت في وضع المشاهدة فقط. لتعديل البيانات وحفظها، يرجى إدخال كود صلاحية الحفظ أولاً.");
     return;
   }
 
@@ -254,62 +251,34 @@ async function persistAll() {
 }
 
 function saveTokenAndLogin() {
-  const inputVal = document.getElementById('tokenInput').value.trim();
-  if (!inputVal) return;
-
-  if (inputVal === '1234') {
-    // Neighbor login with password
-    localStorage.setItem('gh_bldg_token', NEIGHBOR_TOKEN);
-    localStorage.setItem('gh_bldg_role', 'neighbor');
-    document.getElementById('tokenInput').value = ''; // لا نظهر كلمة المرور مرة أخرى
+  const tok = document.getElementById('tokenInput').value.trim();
+  if(tok) {
+    localStorage.setItem('gh_bldg_token', tok);
     checkTokenState();
-    loadData();
-    flash('loginNotif');
-  } else {
-    // Admin login with GitHub token
-    localStorage.setItem('gh_bldg_token', inputVal);
-    localStorage.setItem('gh_bldg_role', 'admin');
-    document.getElementById('tokenInput').value = inputVal; // نتركه ظاهراً كـ password
-    checkTokenState();
-    loadData();
+    loadData(); 
     flash('loginNotif');
   }
 }
 
 function checkTokenState() {
   const storedToken = localStorage.getItem('gh_bldg_token');
-  const storedRole = localStorage.getItem('gh_bldg_role');
-  
-  if (storedToken && storedRole) {
-    currentRole = storedRole;
-    if (currentRole === 'admin') {
-      // Admin full power
-      document.getElementById('modeBadge').style.display = 'none';
-      document.getElementById('neighborBadge').style.display = 'none';
-      document.getElementById('adminBadge').style.display = 'inline-block';
-      document.getElementById('logoutBtn').style.display = 'inline-block';
-      document.getElementById('saveExpRow').style.display = 'block';
-      document.getElementById('editColHeader').style.display = 'table-cell';
-      document.getElementById('issueEditCol').style.display = 'table-cell';
-      // Also ensure expense inputs are editable (handled in render)
-    } else if (currentRole === 'neighbor') {
-      // Neighbor limited: can add issues only
-      document.getElementById('modeBadge').style.display = 'none';
-      document.getElementById('adminBadge').style.display = 'none';
-      document.getElementById('neighborBadge').style.display = 'inline-block';
-      document.getElementById('logoutBtn').style.display = 'inline-block';
-      document.getElementById('saveExpRow').style.display = 'none';
-      document.getElementById('editColHeader').style.display = 'none';
-      document.getElementById('issueEditCol').style.display = 'none';
-    }
+  if(storedToken) {
+    isAdmin = true;
+    document.getElementById('tokenInput').value = storedToken;
+    document.getElementById('modeBadge').textContent = "وضع الإدارة والتعديل";
+    document.getElementById('modeBadge').className = "badge b-admin";
+    document.getElementById('adminBadge').style.display = 'inline-block';
+    document.getElementById('logoutBtn').style.display  = 'inline-block';
+    document.getElementById('saveExpRow').style.display  = 'block';
+    document.getElementById('editColHeader').style.display = 'table-cell';
+    document.getElementById('issueEditCol').style.display  = 'table-cell';
   } else {
-    // Viewer (no token)
-    currentRole = 'viewer';
-    document.getElementById('modeBadge').style.display = 'inline-block';
+    isAdmin = false;
+    document.getElementById('modeBadge').textContent = "وضع المشاهدة";
+    document.getElementById('modeBadge').className = "badge b-view";
     document.getElementById('adminBadge').style.display = 'none';
-    document.getElementById('neighborBadge').style.display = 'none';
-    document.getElementById('logoutBtn').style.display = 'none';
-    document.getElementById('saveExpRow').style.display = 'none';
+    document.getElementById('logoutBtn').style.display  = 'none';
+    document.getElementById('saveExpRow').style.display  = 'none';
     document.getElementById('editColHeader').style.display = 'none';
     document.getElementById('issueEditCol').style.display = 'none';
   }
@@ -317,7 +286,6 @@ function checkTokenState() {
 
 function logout() {
   localStorage.removeItem('gh_bldg_token');
-  localStorage.removeItem('gh_bldg_role');
   document.getElementById('tokenInput').value = '';
   checkTokenState();
   closeDetail();
@@ -363,8 +331,7 @@ function openDetail(f) {
   const c=document.getElementById('detailCard');
   c.style.display='block';
   let editHtml='';
-  // Only admin can edit flats
-  if (currentRole === 'admin') {
+  if (isAdmin) {
     editHtml=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <select class="flat-select" id="ds_${f.id}">
         <option value="empty"   ${f.status==='empty'?'selected':''}>لا أحد</option>
@@ -390,10 +357,6 @@ function openDetail(f) {
 }
 function closeDetail(){document.getElementById('detailCard').style.display='none';}
 async function saveFlatDetail(id) {
-  if (currentRole !== 'admin') {
-    alert("لا تملك صلاحية تعديل الشقق.");
-    return;
-  }
   const f=flats.find(x=>x.id===id);
   f.status=document.getElementById('ds_'+id).value;
   f.paid=document.getElementById('dp_'+id).value==='true';
@@ -413,10 +376,7 @@ function renderPayTable() {
     const rb=f.status==='unknown'?'<span class="badge b-unknown">لم نصل إليه</span>'
       :(f.status==='empty'||f.status==='maybe'?`<span class="badge b-empty">${statusLabel[f.status]}</span>`
       :`<span class="badge b-pending">${statusLabel[f.status]}</span>`);
-    // Edit button only for admin
-    const editTd = (currentRole === 'admin')
-      ? `<td><button style="font-size:11px;padding:2px 7px; background:#17a2b8; color:#fff; border:none; border-radius:3px;" onclick="openDetail(flats.find(x=>x.id===${f.id}))"><i class="ti ti-edit" aria-hidden="true"></i></button></td>`
-      : '';
+    const editTd=isAdmin?`<td><button style="font-size:11px;padding:2px 7px; background:#17a2b8; color:#fff; border:none; border-radius:3px;" onclick="openDetail(flats.find(x=>x.id===${f.id}))"><i class="ti ti-edit" aria-hidden="true"></i></button></td>`:'';
     tb.innerHTML+=`<tr><td style="font-weight:500">${f.id}</td><td>${rb}</td><td>${pb}</td>${editTd}</tr>`;
   });
 }
@@ -427,8 +387,7 @@ function renderIssues() {
   const stMap={pending:'<span class="badge b-pending">انتظار</span>',open:'<span class="badge b-open">مفتوحة</span>',investigating:'<span class="badge b-invest">جارٍ</span>',done:'<span class="badge b-done">منجزة</span>'};
   issues.forEach(iss=>{
     let editTd='';
-    // Only admin can change issue status
-    if (currentRole === 'admin') {
+    if (isAdmin) {
       editTd=`<td><select class="flat-select" onchange="changeIssueStatus(${iss.id},this.value)">
         <option value="pending" ${iss.status==='pending'?'selected':''}>انتظار</option>
         <option value="investigating" ${iss.status==='investigating'?'selected':''}>جارٍ</option>
@@ -440,15 +399,10 @@ function renderIssues() {
   });
 }
 async function changeIssueStatus(id,val) {
-  if (currentRole !== 'admin') {
-    alert("لا تملك صلاحية تغيير حالة المشاكل.");
-    return;
-  }
   const iss=issues.find(x=>x.id===id);
   if(iss){iss.status=val; await persistAll(); renderIssues();}
 }
 async function addIssue() {
-  // Neighbor and admin can add issues (viewer gets alert in persistAll if no token)
   const txt=document.getElementById('newIssueText').value.trim();
   if(!txt)return;
   issues.push({id:issues.length+1,text:txt,pri:'med',status:'pending'});
@@ -463,9 +417,8 @@ function renderExpenses() {
   tb.innerHTML='';
   expenses.forEach((e,i)=>{
     tb.innerHTML+=`<tr><td>${e.label}</td><td>${
-      currentRole === 'admin'
-        ? `<input class="exp-input" type="number" value="${e.amount}" min="0" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
-        : `<span>${Number(e.amount).toLocaleString()} ج</span>`
+      isAdmin?`<input class="exp-input" type="number" value="${e.amount}" min="0" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
+      :`<span>${Number(e.amount).toLocaleString()} ج</span>`
     }</td></tr>`;
   });
   updateExpTotal();
@@ -473,13 +426,7 @@ function renderExpenses() {
 function updateExpTotal(){
   document.getElementById('expTotal').textContent=expenses.reduce((s,e)=>s+Number(e.amount),0).toLocaleString()+' ج';
 }
-async function saveExpenses(){
-  if (currentRole !== 'admin') {
-    alert("لا تملك صلاحية تعديل المصاريف.");
-    return;
-  }
-  await persistAll();flash('expNotif');
-}
+async function saveExpenses(){await persistAll();flash('expNotif');}
 
 function renderMetrics() {
   const agreed=flats.filter(f=>f.status==='agreed').length;
@@ -508,3 +455,15 @@ loadData();
 </script>
 </body>
 </html>
+give me all file after make that :
+iam admin , 
+we have neighbor 
+if neighbor didnt put password then readonly 
+if put 1234 
+then  use git hub token :
+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
+to be able to add problem and save it normally 
+but cant seee frontend wise ability to edit anything else
+else: another valid token ( will be  me )
+then edit anything
+i need new file complete plz
