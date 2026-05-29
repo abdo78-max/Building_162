@@ -14,6 +14,7 @@ body { background: #fafafa; color: #333; }
 .badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .b-admin{background:#d4edda;color:#155724}
 .b-view{background:#cce5ff;color:#004085}
+.b-neighbor{background:#E6F1FB;color:#0C447C}
 .b-paid{background:#EAF3DE;color:#3B6D11}
 .b-pending{background:#FAEEDA;color:#854F0B}
 .b-empty{background:#e9ecef;color:#6c757d}
@@ -22,7 +23,7 @@ body { background: #fafafa; color: #333; }
 .b-invest{background:#E6F1FB;color:#0C447C}
 .b-done{background:#EAF3DE;color:#3B6D11}
 .pin-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
-.pin-row input{width:150px;font-size:13px;padding:5px 10px;border-radius:6px;border:0.5px solid #ced4da;background:#fff;color:#000;direction:ltr}
+.pin-row input{width:280px;font-size:13px;padding:5px 10px;border-radius:6px;border:0.5px solid #ced4da;background:#fff;color:#000;direction:ltr}
 .pin-row button, .issues-form button, .detail-card button, #saveExpRow button, .setup-card button{padding:6px 12px; font-size:12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer;}
 .pin-row button:hover{background:#0056b3}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1.25rem}
@@ -57,7 +58,7 @@ tr:last-child td{border-bottom:none}
 .detail-card{background:#f8f9fa;border-radius:6px;padding:12px;margin-bottom:1rem;display:none;border:0.5px solid #dee2e6;}
 .notif{font-size:11px;color:#28a745;opacity:0;transition:opacity .3s}
 .notif.show{opacity:1}
-.issues-form{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
+.issues-form{display:none;flex-direction:column;gap:8px;margin-bottom:1rem;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
 .issues-form input,.issues-form select{font-size:13px; padding:5px; border:0.5px solid #ced4da; border-radius:4px;}
 .exp-input{background:transparent;border:none;border-bottom:0.5px solid #ced4da;width:80px;font-size:12px;color:#000;text-align:right;padding:1px 2px}
 .loading-overlay{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999;font-size:14px;color:#6c757d;flex-direction:column;gap:12px;text-align:center;padding:20px}
@@ -80,16 +81,16 @@ tr:last-child td{border-bottom:none}
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <span class="badge b-view" id="modeBadge">وضع المشاهدة</span>
-      <span class="badge b-admin" id="adminBadge" style="display:none">مدير (مخوّل للرفع)</span>
+      <span class="badge b-admin" id="adminBadge" style="display:none"></span>
       <span style="font-size:11px;color:#6c757d" id="lastUpdated"></span>
     </div>
   </div>
 
   <div class="pin-row">
-    <input type="password" id="tokenInput" placeholder="أدخل كود الصلاحية لتفعيل الحفظ..." style="width: 260px;"/>
-    <button onclick="saveTokenAndLogin()"><i class="ti ti-key" aria-hidden="true"></i> تفعيل صلاحية الحفظ</button>
+    <input type="password" id="tokenInput" placeholder="أدخل كلمة المرور أو كود الإدارة..." />
+    <button onclick="saveTokenAndLogin()" id="loginBtn"><i class="ti ti-key" aria-hidden="true"></i> دخول</button>
     <span class="notif" id="loginNotif">تم التفعيل ✓</span>
-    <button onclick="logout()" id="logoutBtn" style="display:none; background:#dc3545;">إلغاء الصلاحية</button>
+    <button onclick="logout()" id="logoutBtn" style="display:none; background:#dc3545;">تسجيل الخروج</button>
     <button onclick="loadData()" style="font-size:11px;padding:4px 10px; background:#17a2b8"><i class="ti ti-refresh" aria-hidden="true"></i> تحديث البيانات</button>
   </div>
 
@@ -131,7 +132,7 @@ tr:last-child td{border-bottom:none}
     <div class="card">
       <table><thead><tr><th>البند</th><th>المبلغ (جنيه)</th></tr></thead>
       <tbody id="expTbody"></tbody>
-      <tfoot><tr><td style="font-weight:500;padding:8px 9px">الإجمالي</td><td style="padding:8px 9px;font-weight:500" id="expTotal">0 ج</td></tr></tfoot></table>
+      <tfoot id="expTfoot"><tr><td style="font-weight:500;padding:8px 9px">الإجمالي</td><td style="padding:8px 9px;font-weight:500" id="expTotal">0 ج</td></tr></tfoot></table>
       <div id="saveExpRow" style="margin-top:12px;display:none">
         <button onclick="saveExpenses()" style="font-size:12px;padding:4px 12px"><i class="ti ti-device-floppy" aria-hidden="true"></i> حفظ المصاريف</button>
         <span class="notif" id="expNotif" style="margin-right:8px">تم الحفظ ✓</span>
@@ -143,22 +144,30 @@ tr:last-child td{border-bottom:none}
 <script>
 // ==================== [ إعدادات جيت هاب الخاصة بك ] ====================
 const GH_OWNER = "abdo78-max"; // اسم حسابك
-const GH_REPO  = "Building_162"; // اسم الـ Repository مع مراعاة الحروف الكابيتال
+const GH_REPO  = "Building_162"; // اسم الـ Repository
 const GH_PATH  = "data.json";             
+const NEIGHBOR_TOKEN = "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";
 // ======================================================================
 
-let isAdmin = false;
+let role = 'view'; // 'view', 'neighbor', or 'admin'
 let fileSha = ""; 
 
 let flats = [], issues = [], expenses = [];
 const statusLabel = {agreed:"وافق على الدفع", empty:"لا أحد", maybe:"ربما لا أحد", unknown:"لم نصل إليه"};
+
+// دالة لجلب الكود الصحيح بناءً على الصلاحية
+function getToken() {
+  if (role === 'admin') return localStorage.getItem('bldg_admin_token');
+  if (role === 'neighbor') return NEIGHBOR_TOKEN;
+  return null;
+}
 
 // تحميل البيانات
 async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('loadingText').textContent = "جاري تحديث البيانات...";
   
-  const token = localStorage.getItem('gh_bldg_token') || "";
+  const token = getToken();
   const headers = { "Accept": "application/vnd.github+json" };
   if (token) {
     headers["Authorization"] = `token ${token}`;
@@ -190,7 +199,7 @@ async function loadData() {
     renderAll();
   } catch(e) {
     console.error("خطأ أثناء جلب البيانات:", e);
-    alert("فشل في تحميل البيانات الحالية، يرجى التحقق من اتصال الإنترنت أو صلاحية الكود.");
+    alert("فشل في تحميل البيانات الحالية، يرجى التحقق من اتصال الإنترنت أو صحة الـ Token.");
   }
   
   document.getElementById('loadingOverlay').style.display = 'none';
@@ -199,9 +208,9 @@ async function loadData() {
 
 // رفع وحفظ التعديلات
 async function persistAll() {
-  const token = localStorage.getItem('gh_bldg_token');
+  const token = getToken();
   if (!token) {
-    alert("أنت في وضع المشاهدة فقط. لتعديل البيانات وحفظها، يرجى إدخال كود صلاحية الحفظ أولاً.");
+    alert("أنت في وضع المشاهدة فقط. لتعديل البيانات، يرجى إدخال كلمة المرور أو كود الإدارة أولاً.");
     return;
   }
 
@@ -215,7 +224,7 @@ async function persistAll() {
 
   try {
     const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
-       headers: token ? { "Authorization": `token ${token}` } : {}
+       headers: { "Authorization": `token ${token}` }
     });
     if(getRes.ok) {
        const getJson = await getRes.json();
@@ -246,47 +255,97 @@ async function persistAll() {
     document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + now;
   } catch(e) {
     console.error("خطأ في رفع البيانات:", e);
-    alert("حدث خطأ أثناء حفظ البيانات. تأكد من صلاحيات الكود المستخدم.");
+    alert("حدث خطأ أثناء حفظ البيانات. تأكد من صلاحيات الكود أو كلمة المرور المستخدمة.");
   }
 }
 
 function saveTokenAndLogin() {
-  const tok = document.getElementById('tokenInput').value.trim();
-  if(tok) {
-    localStorage.setItem('gh_bldg_token', tok);
-    checkTokenState();
-    loadData(); 
-    flash('loginNotif');
+  const inputVal = document.getElementById('tokenInput').value.trim();
+  if (!inputVal) return;
+
+  if (inputVal === '1234') {
+    localStorage.setItem('bldg_role', 'neighbor');
+    localStorage.removeItem('bldg_admin_token');
+  } else {
+    localStorage.setItem('bldg_role', 'admin');
+    localStorage.setItem('bldg_admin_token', inputVal);
   }
+  
+  checkTokenState();
+  loadData(); 
+  flash('loginNotif');
 }
 
 function checkTokenState() {
-  const storedToken = localStorage.getItem('gh_bldg_token');
-  if(storedToken) {
-    isAdmin = true;
-    document.getElementById('tokenInput').value = storedToken;
-    document.getElementById('modeBadge').textContent = "وضع الإدارة والتعديل";
-    document.getElementById('modeBadge').className = "badge b-admin";
-    document.getElementById('adminBadge').style.display = 'inline-block';
-    document.getElementById('logoutBtn').style.display  = 'inline-block';
-    document.getElementById('saveExpRow').style.display  = 'block';
-    document.getElementById('editColHeader').style.display = 'table-cell';
-    document.getElementById('issueEditCol').style.display  = 'table-cell';
+  role = localStorage.getItem('bldg_role') || 'view';
+  
+  const modeBadge = document.getElementById('modeBadge');
+  const adminBadge = document.getElementById('adminBadge');
+  const tokenInput = document.getElementById('tokenInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  
+  const saveExpRow = document.getElementById('saveExpRow');
+  const editColHeader = document.getElementById('editColHeader');
+  const issueEditCol = document.getElementById('issueEditCol');
+  const issueForm = document.getElementById('issueForm');
+
+  if (role === 'admin') {
+    modeBadge.textContent = "وضع الإدارة الكاملة";
+    modeBadge.className = "badge b-admin";
+    
+    adminBadge.style.display = 'none'; // نكتفي ببادج واحد للتوضيح
+    tokenInput.style.display = 'none';
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display  = 'inline-block';
+    
+    // إظهار كافة أدوات التعديل
+    saveExpRow.style.display  = 'block';
+    editColHeader.style.display = 'table-cell';
+    issueEditCol.style.display  = 'table-cell';
+    issueForm.style.display = 'flex';
+
+  } else if (role === 'neighbor') {
+    modeBadge.textContent = "وضع الساكن";
+    modeBadge.className = "badge b-neighbor";
+    
+    adminBadge.style.display = 'inline-block';
+    adminBadge.textContent = "صلاحية: إضافة شكاوى/مشاكل فقط";
+    adminBadge.className = "badge b-invest";
+    
+    tokenInput.style.display = 'none';
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display  = 'inline-block';
+    
+    // إخفاء التعديلات الخاصة بالمصاريف والشقق وحالة المشاكل
+    saveExpRow.style.display  = 'none';
+    editColHeader.style.display = 'none';
+    issueEditCol.style.display  = 'none';
+    
+    // إظهار فورم إضافة المشاكل فقط
+    issueForm.style.display = 'flex';
+
   } else {
-    isAdmin = false;
-    document.getElementById('modeBadge').textContent = "وضع المشاهدة";
-    document.getElementById('modeBadge').className = "badge b-view";
-    document.getElementById('adminBadge').style.display = 'none';
-    document.getElementById('logoutBtn').style.display  = 'none';
-    document.getElementById('saveExpRow').style.display  = 'none';
-    document.getElementById('editColHeader').style.display = 'none';
-    document.getElementById('issueEditCol').style.display = 'none';
+    // وضع المشاهدة (الافتراضي)
+    modeBadge.textContent = "وضع المشاهدة";
+    modeBadge.className = "badge b-view";
+    adminBadge.style.display = 'none';
+    
+    tokenInput.style.display = 'inline-block';
+    tokenInput.value = '';
+    loginBtn.style.display = 'inline-block';
+    logoutBtn.style.display  = 'none';
+    
+    saveExpRow.style.display  = 'none';
+    editColHeader.style.display = 'none';
+    issueEditCol.style.display  = 'none';
+    issueForm.style.display = 'none';
   }
 }
 
 function logout() {
-  localStorage.removeItem('gh_bldg_token');
-  document.getElementById('tokenInput').value = '';
+  localStorage.removeItem('bldg_role');
+  localStorage.removeItem('bldg_admin_token');
   checkTokenState();
   closeDetail();
   renderAll();
@@ -331,7 +390,7 @@ function openDetail(f) {
   const c=document.getElementById('detailCard');
   c.style.display='block';
   let editHtml='';
-  if (isAdmin) {
+  if (role === 'admin') {
     editHtml=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <select class="flat-select" id="ds_${f.id}">
         <option value="empty"   ${f.status==='empty'?'selected':''}>لا أحد</option>
@@ -376,7 +435,7 @@ function renderPayTable() {
     const rb=f.status==='unknown'?'<span class="badge b-unknown">لم نصل إليه</span>'
       :(f.status==='empty'||f.status==='maybe'?`<span class="badge b-empty">${statusLabel[f.status]}</span>`
       :`<span class="badge b-pending">${statusLabel[f.status]}</span>`);
-    const editTd=isAdmin?`<td><button style="font-size:11px;padding:2px 7px; background:#17a2b8; color:#fff; border:none; border-radius:3px;" onclick="openDetail(flats.find(x=>x.id===${f.id}))"><i class="ti ti-edit" aria-hidden="true"></i></button></td>`:'';
+    const editTd= (role === 'admin') ? `<td><button style="font-size:11px;padding:2px 7px; background:#17a2b8; color:#fff; border:none; border-radius:3px;" onclick="openDetail(flats.find(x=>x.id===${f.id}))"><i class="ti ti-edit" aria-hidden="true"></i></button></td>` : '';
     tb.innerHTML+=`<tr><td style="font-weight:500">${f.id}</td><td>${rb}</td><td>${pb}</td>${editTd}</tr>`;
   });
 }
@@ -387,7 +446,7 @@ function renderIssues() {
   const stMap={pending:'<span class="badge b-pending">انتظار</span>',open:'<span class="badge b-open">مفتوحة</span>',investigating:'<span class="badge b-invest">جارٍ</span>',done:'<span class="badge b-done">منجزة</span>'};
   issues.forEach(iss=>{
     let editTd='';
-    if (isAdmin) {
+    if (role === 'admin') {
       editTd=`<td><select class="flat-select" onchange="changeIssueStatus(${iss.id},this.value)">
         <option value="pending" ${iss.status==='pending'?'selected':''}>انتظار</option>
         <option value="investigating" ${iss.status==='investigating'?'selected':''}>جارٍ</option>
@@ -417,7 +476,7 @@ function renderExpenses() {
   tb.innerHTML='';
   expenses.forEach((e,i)=>{
     tb.innerHTML+=`<tr><td>${e.label}</td><td>${
-      isAdmin?`<input class="exp-input" type="number" value="${e.amount}" min="0" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
+      role === 'admin' ?`<input class="exp-input" type="number" value="${e.amount}" min="0" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
       :`<span>${Number(e.amount).toLocaleString()} ج</span>`
     }</td></tr>`;
   });
@@ -455,15 +514,3 @@ loadData();
 </script>
 </body>
 </html>
-give me all file after make that :
-iam admin , 
-we have neighbor 
-if neighbor didnt put password then readonly 
-if put 1234 
-then  use git hub token :
-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
-to be able to add problem and save it normally 
-but cant seee frontend wise ability to edit anything else
-else: another valid token ( will be  me )
-then edit anything
-i need new file complete plz
