@@ -1,0 +1,49 @@
+{
+  "flats": [
+    {"id": 1, "status": "empty", "paid": false},
+    {"id": 2, "status": "agreed", "paid": false},
+    {"id": 3, "status": "empty", "paid": false},
+    {"id": 4, "status": "empty", "paid": false},
+    {"id": 5, "status": "agreed", "paid": false},
+    {"id": 6, "status": "empty", "paid": false},
+    {"id": 7, "status": "agreed", "paid": false},
+    {"id": 8, "status": "unknown", "paid": false},
+    {"id": 9, "status": "agreed", "paid": false},
+    {"id": 10, "status": "agreed", "paid": false},
+    {"id": 11, "status": "agreed", "paid": false},
+    {"id": 12, "status": "agreed", "paid": false},
+    {"id": 13, "status": "agreed", "paid": false},
+    {"id": 14, "status": "agreed", "paid": false},
+    {"id": 15, "status": "agreed", "paid": false},
+    {"id": 16, "status": "empty", "paid": false},
+    {"id": 17, "status": "maybe", "paid": false},
+    {"id": 18, "status": "maybe", "paid": false},
+    {"id": 19, "status": "maybe", "paid": false},
+    {"id": 20, "status": "maybe", "paid": false},
+    {"id": 21, "status": "empty", "paid": false},
+    {"id": 22, "status": "agreed", "paid": false},
+    {"id": 23, "status": "agreed", "paid": false},
+    {"id": 24, "status": "empty", "paid": false}
+  ],
+  "issues": [
+    {"id": 1, "text": "دهان الأدوار 3 و4 و5", "pri": "high", "status": "pending"},
+    {"id": 2, "text": "تطوير نظام الكاميرات", "pri": "med", "status": "pending"},
+    {"id": 3, "text": "تشطيب أرضيات الأدوار 3 و4 و5", "pri": "med", "status": "pending"},
+    {"id": 4, "text": "مشكلة القمامة في الدور الخامس", "pri": "high", "status": "investigating"},
+    {"id": 5, "text": "الاستفادة من المساحة الحرة بالأرضي", "pri": "med", "status": "open"},
+    {"id": 6, "text": "حماية ألمنيوم ضد الجرذان والحشرات", "pri": "high", "status": "pending"},
+    {"id": 7, "text": "قمامة أمام بعض الشقق", "pri": "high", "status": "pending"}
+  ],
+  "expenses": [
+    {"label": "صيانة الكاميرات", "amount": 0},
+    {"label": "كهرباء", "amount": 0}
+  ],
+  "monthly": [
+    {"month": "يناير", "pct": 0},
+    {"month": "فبراير", "pct": 0},
+    {"month": "مارس", "pct": 0},
+    {"month": "أبريل", "pct": 0},
+    {"month": "مايو", "pct": 0}
+  ],
+  "lastUpdated": "جاهز للمزامنة الأولى"
+}
