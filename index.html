@@ -14,6 +14,7 @@ body { background: #fafafa; color: #333; }
 .badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .b-admin{background:#d4edda;color:#155724}
 .b-view{background:#cce5ff;color:#004085}
+.b-neighbor{background:#fff3cd;color:#856404}
 .b-paid{background:#EAF3DE;color:#3B6D11}
 .b-pending{background:#FAEEDA;color:#854F0B}
 .b-empty{background:#e9ecef;color:#6c757d}
@@ -29,7 +30,6 @@ body { background: #fafafa; color: #333; }
 .mc{background:#fff; border: 0.5px solid #dee2e6; border-radius:6px;padding:12px 10px}
 .mc .lbl{font-size:11px;color:#6c757d;margin-bottom:3px}
 .mc .val{font-size:20px;font-weight:500;color:#111}
-.mc .sub{font-size:10px;color:#6c757d;margin-top:1px}
 .tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
 .tab{font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;border:0.5px solid #ced4da;background:#fff;color:#495057}
 .tab.active{background:#007bff;color:#fff;border-color:#007bff}
@@ -57,7 +57,7 @@ tr:last-child td{border-bottom:none}
 .detail-card{background:#f8f9fa;border-radius:6px;padding:12px;margin-bottom:1rem;display:none;border:0.5px solid #dee2e6;}
 .notif{font-size:11px;color:#28a745;opacity:0;transition:opacity .3s}
 .notif.show{opacity:1}
-.issues-form{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
+.issues-form{display:none;flex-direction:column;gap:8px;margin-bottom:1rem;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
 .issues-form input,.issues-form select{font-size:13px; padding:5px; border:0.5px solid #ced4da; border-radius:4px;}
 .exp-input{background:transparent;border:none;border-bottom:0.5px solid #ced4da;width:80px;font-size:12px;color:#000;text-align:right;padding:1px 2px}
 .loading-overlay{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999;font-size:14px;color:#6c757d;flex-direction:column;gap:12px;text-align:center;padding:20px}
@@ -86,8 +86,8 @@ tr:last-child td{border-bottom:none}
   </div>
 
   <div class="pin-row">
-    <input type="password" id="tokenInput" placeholder="أدخل كود الصلاحية لتفعيل الحفظ..." style="width: 260px;"/>
-    <button onclick="saveTokenAndLogin()"><i class="ti ti-key" aria-hidden="true"></i> تفعيل صلاحية الحفظ</button>
+    <input type="password" id="tokenInput" placeholder="اكتب كود الجيران 1234 أو التوكن الخاص بك..." style="width: 260px;"/>
+    <button onclick="saveTokenAndLogin()"><i class="ti ti-key" aria-hidden="true"></i> تفعيل الصلاحية</button>
     <span class="notif" id="loginNotif">تم التفعيل ✓</span>
     <button onclick="logout()" id="logoutBtn" style="display:none; background:#dc3545;">إلغاء الصلاحية</button>
     <button onclick="loadData()" style="font-size:11px;padding:4px 10px; background:#17a2b8"><i class="ti ti-refresh" aria-hidden="true"></i> تحديث البيانات</button>
@@ -141,24 +141,32 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-// ==================== [ إعدادات جيت هاب الخاصة بك ] ====================
-const GH_OWNER = "abdo78-max"; // اسم حسابك
-const GH_REPO  = "Building_162"; // اسم الـ Repository مع مراعاة الحروف الكابيتال
+// ==================== [ إعدادات جيت هاب ] ====================
+const GH_OWNER = "abdo78-max"; 
+const GH_REPO  = "Building_162"; 
 const GH_PATH  = "data.json";             
-// ======================================================================
+const GUEST_PIN = "1234"; // كود الجيران الثابت
+// =============================================================
 
 let isAdmin = false;
+let isNeighbor = false;
 let fileSha = ""; 
 
 let flats = [], issues = [], expenses = [];
 const statusLabel = {agreed:"وافق على الدفع", empty:"لا أحد", maybe:"ربما لا أحد", unknown:"لم نصل إليه"};
 
-// تحميل البيانات
+function getActiveToken() {
+  const stored = localStorage.getItem('gh_bldg_token') || "";
+  // لو المكتوب هو كود الجار، مش هنبعت توكن لجيت هاب (لأن 1234 مش توكن حقيقي)
+  if (stored === GUEST_PIN) return ""; 
+  return stored; 
+}
+
 async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
-  document.getElementById('loadingText').textContent = "جاري تحديث البيانات...";
+  document.getElementById('loadingText').textContent = "جاري تحميل البيانات...";
   
-  const token = localStorage.getItem('gh_bldg_token') || "";
+  const token = getActiveToken();
   const headers = { "Accept": "application/vnd.github+json" };
   if (token) {
     headers["Authorization"] = `token ${token}`;
@@ -166,10 +174,7 @@ async function loadData() {
 
   try {
     const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}?nocache=${new Date().getTime()}`, { headers });
-    
-    if (!response.ok) {
-      throw new Error("فشل الوصول للملف.");
-    }
+    if (!response.ok) throw new Error("فشل جلب الملف.");
 
     const json = await response.json();
     fileSha = json.sha; 
@@ -186,42 +191,36 @@ async function loadData() {
     if (serverData.lastUpdated) {
       document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + serverData.lastUpdated;
     }
-    
     renderAll();
   } catch(e) {
-    console.error("خطأ أثناء جلب البيانات:", e);
-    alert("فشل في تحميل البيانات الحالية، يرجى التحقق من اتصال الإنترنت أو صلاحية الكود.");
+    console.error(e);
   }
-  
   document.getElementById('loadingOverlay').style.display = 'none';
   document.getElementById('app').style.opacity = '1';
 }
 
-// رفع وحفظ التعديلات
 async function persistAll() {
-  const token = localStorage.getItem('gh_bldg_token');
+  const token = getActiveToken();
+  
+  // لو اللي بيحاول يرفع هو جار بكود 1234 ومعهوش التوكن الأصلي بتاعك
+  if (isNeighbor && !token) {
+    alert("⚠️ عذراً: كود الجيران (1234) يمنحك صلاحية كتابة المشكلة على الشاشة فقط، ولكن لحفظها نهائياً في جيت هاب يجب أن يقوم الأدمن بحفظها باستخدام التوكن الخاص به.");
+    return;
+  }
+
   if (!token) {
-    alert("أنت في وضع المشاهدة فقط. لتعديل البيانات وحفظها، يرجى إدخال كود صلاحية الحفظ أولاً.");
+    alert("أنت في وضع المشاهدة فقط. يرجى إدخال التوكن الخاص بك للتعديل.");
     return;
   }
 
   const now = new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
   const payload = { flats, issues, expenses, lastUpdated: now };
-  
   const jsonString = JSON.stringify(payload, null, 2);
   const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
       return String.fromCharCode('0x' + p1);
   }));
 
   try {
-    const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
-       headers: token ? { "Authorization": `token ${token}` } : {}
-    });
-    if(getRes.ok) {
-       const getJson = await getRes.json();
-       if(getJson.sha) fileSha = getJson.sha;
-    }
-
     const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
       method: 'PUT',
       headers: { 
@@ -236,17 +235,15 @@ async function persistAll() {
       })
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error("فشل الرفع: " + errText);
+    if (response.ok) {
+      const resJson = await response.json();
+      fileSha = resJson.content.sha; 
+      document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + now;
+    } else {
+      alert("فشل الرفع: تأكد من صلاحية التوكن المدخل.");
     }
-    
-    const resJson = await response.json();
-    fileSha = resJson.content.sha; 
-    document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + now;
   } catch(e) {
-    console.error("خطأ في رفع البيانات:", e);
-    alert("حدث خطأ أثناء حفظ البيانات. تأكد من صلاحيات الكود المستخدم.");
+    alert("حدث خطأ أثناء الاتصال بجيت هاب.");
   }
 }
 
@@ -261,23 +258,40 @@ function saveTokenAndLogin() {
 }
 
 function checkTokenState() {
-  const storedToken = localStorage.getItem('gh_bldg_token');
-  if(storedToken) {
-    isAdmin = true;
+  const storedToken = localStorage.getItem('gh_bldg_token') || "";
+  
+  if (storedToken === GUEST_PIN) {
+    isAdmin = false;
+    isNeighbor = true;
     document.getElementById('tokenInput').value = storedToken;
-    document.getElementById('modeBadge').textContent = "وضع الإدارة والتعديل";
+    document.getElementById('modeBadge').textContent = "وضع الجار (مشاهدة + إضافة بلاغ)";
+    document.getElementById('modeBadge').className = "badge b-neighbor";
+    document.getElementById('adminBadge').style.display = 'none';
+    document.getElementById('logoutBtn').style.display  = 'inline-block';
+    document.getElementById('issueForm').style.display  = 'flex'; 
+    document.getElementById('saveExpRow').style.display  = 'none';
+    document.getElementById('editColHeader').style.display = 'none';
+    document.getElementById('issueEditCol').style.display = 'none';
+  } else if (storedToken && storedToken !== "") {
+    isAdmin = true;
+    isNeighbor = false;
+    document.getElementById('tokenInput').value = storedToken;
+    document.getElementById('modeBadge').textContent = "وضع الإدارة الكاملة";
     document.getElementById('modeBadge').className = "badge b-admin";
     document.getElementById('adminBadge').style.display = 'inline-block';
     document.getElementById('logoutBtn').style.display  = 'inline-block';
+    document.getElementById('issueForm').style.display  = 'flex'; 
     document.getElementById('saveExpRow').style.display  = 'block';
     document.getElementById('editColHeader').style.display = 'table-cell';
     document.getElementById('issueEditCol').style.display  = 'table-cell';
   } else {
     isAdmin = false;
-    document.getElementById('modeBadge').textContent = "وضع المشاهدة";
+    isNeighbor = false;
+    document.getElementById('modeBadge').textContent = "وضع المشاهدة العامة";
     document.getElementById('modeBadge').className = "badge b-view";
     document.getElementById('adminBadge').style.display = 'none';
     document.getElementById('logoutBtn').style.display  = 'none';
+    document.getElementById('issueForm').style.display  = 'none'; 
     document.getElementById('saveExpRow').style.display  = 'none';
     document.getElementById('editColHeader').style.display = 'none';
     document.getElementById('issueEditCol').style.display = 'none';
@@ -449,7 +463,6 @@ function renderAll(){
   renderExpenses();
 }
 
-// الفحص والتحميل المباشر عند الفتح
 checkTokenState();
 loadData();
 </script>
