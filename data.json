@@ -12,7 +12,7 @@
     },
     {
       "id": 3,
-      "status": "empty",
+      "status": "agreed",
       "paid": false
     },
     {
@@ -191,5 +191,5 @@
       "amount": 0
     }
   ],
-  "lastUpdated": "٢٧ يونيو ٢٠٢٦ في ٠٥:٤٣ م"
+  "lastUpdated": "٢٧ يونيو ٢٠٢٦ في ٠٥:٤٤ م"
 }
