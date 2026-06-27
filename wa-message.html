@@ -193,7 +193,7 @@ async function loadData() {
 
   if (!isReminderPeriod(info.day)) {
     document.getElementById('statusBadge').className = 'status-badge status-inactive';
-    document.getElementById('statusBadge').textContent = `⏸ التذكير يبدأ من 1 إلى 7 من كل شهر`;
+    document.getElementById('statusBadge').textContent = `⏸ التذكير يبدأ من 1 إلى 28 من كل شهر`;
     document.getElementById('mainContent').innerHTML = `
       <div class="no-unpaid">
         <div class="check">📅</div>
