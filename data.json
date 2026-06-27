@@ -180,15 +180,15 @@
   "expenses": [
     {
       "label": "الكاميرات",
-      "amount": 20
+      "amount": 0
     },
     {
       "label": "كهرباء",
-      "amount": 50
+      "amount": 0
     },
     {
       "label": "الصندوق",
-      "amount": 100
+      "amount": 0
     }
   ],
   "lastUpdated": "٢٧ يونيو ٢٠٢٦ في ٠٥:١٣ م"
