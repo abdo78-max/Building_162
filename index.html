@@ -150,8 +150,8 @@ tr:last-child td{border-bottom:none}
         </thead>
         <tbody id="expTbody"></tbody>
         <tfoot>
-          <tr>
-            <td style="font-weight:500;padding:8px 9px">الإجمالي</td>
+          <tr id="expTotalRow">
+            <td style="font-weight:500;padding:8px 9px">المتبقي في الصندوق</td>
             <td style="padding:8px 9px;font-weight:500" id="expTotal">0 ج</td>
             <td id="expDelColFoot" style="display:none"></td>
           </tr>
@@ -486,23 +486,43 @@ function renderExpenses() {
   tb.innerHTML = '';
   const isAdmin = role === 'admin';
 
-  expenses.forEach((e, i) => {
+  // الصندوق دايماً أول بند
+  const sorted = [...expenses].sort((a,b) => {
+    if (a.label === 'الصندوق') return -1;
+    if (b.label === 'الصندوق') return 1;
+    return 0;
+  });
+
+  sorted.forEach((e) => {
+    const i = expenses.indexOf(e);
+    const isBox = e.label === 'الصندوق';
+    const rowStyle = isBox ? 'background:#EAF3DE;' : '';
+    const labelCell = isBox ? `<strong style="color:#155724">🏦 ${e.label}</strong>` : e.label;
+
     const amountCell = isAdmin
-      ? `<input class="exp-input" type="number" value="${e.amount}" min="0" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
-      : `<span>${Number(e.amount).toLocaleString()} ج</span>`;
+      ? `<input class="exp-input" type="number" value="${e.amount}" min="0" style="${isBox?'color:#155724;font-weight:600':''}" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
+      : `<span style="font-weight:${isBox?'600':'400'};color:${isBox?'#155724':'inherit'}">${Number(e.amount).toLocaleString()} ج</span>`;
 
     const delCell = isAdmin
-      ? `<td><button class="del-btn" onclick="deleteExpense(${i})">حذف</button></td>`
+      ? (!isBox ? `<td><button class="del-btn" onclick="deleteExpense(${i})">حذف</button></td>` : '<td></td>')
       : '';
 
-    tb.innerHTML += `<tr><td>${e.label}</td><td>${amountCell}</td>${delCell}</tr>`;
+    tb.innerHTML += `<tr style="${rowStyle}"><td>${labelCell}</td><td>${amountCell}</td>${delCell}</tr>`;
   });
 
   updateExpTotal();
 }
 
 function updateExpTotal() {
-  document.getElementById('expTotal').textContent = expenses.reduce((s,e) => s + Number(e.amount), 0).toLocaleString() + ' ج';
+  const sandbox     = Number((expenses.find(e => e.label === 'الصندوق') || {amount:0}).amount);
+  const otherTotal  = expenses.filter(e => e.label !== 'الصندوق').reduce((s,e) => s + Number(e.amount), 0);
+  const remaining   = sandbox - otherTotal;
+  const color = remaining >= 0 ? '#155724' : '#721c24';
+  const bg    = remaining >= 0 ? '#EAF3DE'  : '#FCEBEB';
+  document.getElementById('expTotal').innerHTML =
+    `<span style="color:${color};font-weight:600">${remaining.toLocaleString()} ج</span>` +
+    `<span style="font-size:10px;color:#6c757d;margin-right:8px">(${sandbox.toLocaleString()} - ${otherTotal.toLocaleString()})</span>`;
+  document.getElementById('expTotalRow').style.background = bg;
 }
 
 function addExpense() {
@@ -532,7 +552,10 @@ function renderMetrics() {
   const paid    = flats.filter(f=>f.paid).length;
   const empty   = flats.filter(f=>f.status==='empty'||f.status==='maybe').length;
   const doneIss = issues.filter(i=>i.status==='done').length;
-  const totalExp= expenses.reduce((s,e)=>s+Number(e.amount),0);
+  const sandbox    = Number((expenses.find(e=>e.label==='الصندوق')||{amount:0}).amount);
+  const otherTotal = expenses.filter(e=>e.label!=='الصندوق').reduce((s,e)=>s+Number(e.amount),0);
+  const remaining  = sandbox - otherTotal;
+  const remColor   = remaining >= 0 ? '#155724' : '#dc3545';
 
   document.getElementById('metricsRow').innerHTML=`
     <div class="mc"><div class="lbl">إجمالي الشقق</div><div class="val">${flats.length}</div></div>
@@ -540,7 +563,7 @@ function renderMetrics() {
     <div class="mc"><div class="lbl">المسددين فعلياً</div><div class="val">${paid}</div></div>
     <div class="mc"><div class="lbl">شقق فارغة</div><div class="val">${empty}</div></div>
     <div class="mc"><div class="lbl">طلبات منجزة</div><div class="val">${doneIss}/${issues.length}</div></div>
-    <div class="mc"><div class="lbl">إجمالي المصاريف</div><div class="val" style="font-size:15px">${totalExp.toLocaleString()} ج</div></div>`;
+    <div class="mc"><div class="lbl">المتبقي في الصندوق</div><div class="val" style="font-size:15px;color:${remColor}">${remaining.toLocaleString()} ج</div></div>`;
 }
 
 function renderAll(){
