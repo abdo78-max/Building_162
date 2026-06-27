@@ -3,7 +3,7 @@
     {
       "id": 1,
       "status": "maybe",
-      "paid": true
+      "paid": false
     },
     {
       "id": 2,
