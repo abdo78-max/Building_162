@@ -2,7 +2,7 @@
   "flats": [
     {
       "id": 1,
-      "status": "empty",
+      "status": "maybe",
       "paid": true
     },
     {
@@ -187,5 +187,5 @@
       "amount": 0
     }
   ],
-  "lastUpdated": "٢٧ يونيو ٢٠٢٦ في ٠٤:٢٨ م"
+  "lastUpdated": "٢٧ يونيو ٢٠٢٦ في ٠٤:٢٩ م"
 }
