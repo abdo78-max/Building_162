@@ -3,7 +3,7 @@
     {
       "id": 1,
       "status": "empty",
-      "paid": false
+      "paid": true
     },
     {
       "id": 2,
