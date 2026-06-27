@@ -108,7 +108,7 @@
     {
       "id": 22,
       "status": "agreed",
-      "paid": false
+      "paid": true
     },
     {
       "id": 23,
@@ -187,5 +187,5 @@
       "amount": 0
     }
   ],
-  "lastUpdated": "٢٧ يونيو ٢٠٢٦ في ٠٤:٢٩ م"
+  "lastUpdated": "٢٧ يونيو ٢٠٢٦ في ٠٤:٣٠ م"
 }
