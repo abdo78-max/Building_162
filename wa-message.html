@@ -170,7 +170,7 @@ const GH_PATH  = "data.json";
 // رقم المجموعة على واتساب - عدّل هنا برقم المجموعة
 // لو مجموعة: استخدم الـ Group Invite Link أو رقم الجروب
 // لو رقم فردي: مثلاً 201507085053 (بدون +)
-const WHATSAPP_GROUP = "https://api.whatsapp.com/send/?invite=$%7BWHATSAPP_GROUP.split(%27/%27).pop()%7D&text=$%7BencodeURIComponent(msg)%7D"; // ← عدّل هنا برقم المجموعة
+const WHATSAPP_GROUP = "HPjLofjRdNc5pkvkjeAdI4"; // كود المجموعة
 
 function getTodayInfo() {
   const now = new Date();
@@ -243,7 +243,7 @@ ${flatsList}
     document.getElementById('statusBadge').className = 'status-badge status-active';
     document.getElementById('statusBadge').textContent = `📅 اليوم ${info.day} من ${info.monthName} — ${unpaid.length} شقة لم تدفع`;
 
-    const waUrl = `https://wa.me/${WHATSAPP_GROUP}?text=${encodeURIComponent(msg)}`;
+    const waUrl = `https://api.whatsapp.com/send/?invite=${WHATSAPP_GROUP}&text=${encodeURIComponent(msg)}`;
 
     document.getElementById('mainContent').innerHTML = `
       <div class="stats">
