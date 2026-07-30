@@ -8,12 +8,12 @@
     {
       "id": 2,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 3,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 4,
@@ -23,7 +23,7 @@
     {
       "id": 5,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 6,
@@ -33,27 +33,27 @@
     {
       "id": 7,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 8,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 9,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 10,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 11,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 12,
@@ -63,17 +63,17 @@
     {
       "id": 13,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 14,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 15,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 16,
@@ -83,7 +83,7 @@
     {
       "id": 17,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 18,
@@ -98,7 +98,7 @@
     {
       "id": 20,
       "status": "agreed",
-      "paid": true
+      "paid": false
     },
     {
       "id": 21,
