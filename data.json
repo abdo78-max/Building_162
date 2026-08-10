@@ -180,7 +180,7 @@
       "id": 10,
       "text": "لمبة المدخل عاوزة تتصلح",
       "pri": "med",
-      "status": "pending"
+      "status": "done"
     }
   ],
   "expenses": [
@@ -209,5 +209,5 @@
       "amount": 400
     }
   ],
-  "lastUpdated": "١٠ أغسطس ٢٠٢٦ في ٠٢:١٠ ص"
+  "lastUpdated": "١٠ أغسطس ٢٠٢٦ في ١٠:١١ ص"
 }
