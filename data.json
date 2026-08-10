@@ -181,6 +181,12 @@
       "text": "لمبة المدخل عاوزة تتصلح",
       "pri": "med",
       "status": "done"
+    },
+    {
+      "id": 11,
+      "text": "مكنة السلم",
+      "pri": "med",
+      "status": "pending"
     }
   ],
   "expenses": [
