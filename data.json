@@ -187,6 +187,12 @@
       "text": "مكنة السلم",
       "pri": "med",
       "status": "done"
+    },
+    {
+      "id": 12,
+      "text": "مشكلة الليد نصه مش شغال",
+      "pri": "med",
+      "status": "pending"
     }
   ],
   "expenses": [
@@ -215,5 +221,5 @@
       "amount": 400
     }
   ],
-  "lastUpdated": "١٠ أغسطس ٢٠٢٦ في ١٠:١١ ص"
+  "lastUpdated": "١٠ أغسطس ٢٠٢٦ في ٠٦:٤٢ م"
 }
