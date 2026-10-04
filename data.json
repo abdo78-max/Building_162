@@ -58,7 +58,7 @@
     {
       "id": 12,
       "status": "agreed",
-      "paid": false
+      "paid": true
     },
     {
       "id": 13,
